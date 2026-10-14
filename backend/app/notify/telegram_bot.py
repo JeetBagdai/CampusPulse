@@ -31,8 +31,12 @@ class TelegramBot(Notifier):
     def __init__(self):
         self.api = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
         # hosted disks reset on deploy, so role links can also come from the TELEGRAM_CHATS secret
-        raw = CHATS_FILE.read_text() if CHATS_FILE.exists() else os.getenv("TELEGRAM_CHATS", "")
-        data = json.loads(raw) if raw.strip() else {}
+        raw = (CHATS_FILE.read_text() if CHATS_FILE.exists() else os.getenv("TELEGRAM_CHATS", "")).strip().strip("'\"")
+        try:
+            data = json.loads(raw) if raw else {}
+        except json.JSONDecodeError:
+            log.warning("TELEGRAM_CHATS is not valid JSON; starting with no linked roles")
+            data = {}
         if "roles" not in data:  # older flat {role: chat_id} format
             data = {"roles": data, "langs": {}}
         self.chats: dict[str, int] = data["roles"]
