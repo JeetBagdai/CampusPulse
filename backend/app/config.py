@@ -66,8 +66,10 @@ NAAC_SECTIONS = [
 
 # --- Runtime settings --------------------------------------------------------
 NOTIFIER = os.getenv("NOTIFIER", "console").lower()
-PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000").rstrip("/")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+# On Render, RENDER_EXTERNAL_URL is set automatically to the public https URL
+_PUBLIC = os.getenv("RENDER_EXTERNAL_URL", "")
+PUBLIC_BASE_URL = (os.getenv("PUBLIC_BASE_URL") or _PUBLIC or "http://localhost:8000").rstrip("/")
+FRONTEND_URL = (os.getenv("FRONTEND_URL") or _PUBLIC or "http://localhost:5173").rstrip("/")
 
 STAFF_PHONES = {
     "electrician": os.getenv("STAFF_PHONE_ELECTRICIAN", ""),

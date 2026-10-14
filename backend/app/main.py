@@ -61,7 +61,9 @@ async def lifespan(app: FastAPI):
     task = asyncio.create_task(sim_loop())
     if hasattr(engine.notifier, "poll"):
         asyncio.create_task(engine.notifier.poll(engine))
-    asyncio.get_running_loop().run_in_executor(None, detectors._person_model)  # warm up YOLO
+    loop = asyncio.get_running_loop()
+    loop.run_in_executor(None, detectors._person_model)  # warm up the detector
+    loop.run_in_executor(None, whatif.run, {"auto_off_minutes": 10, "led_retrofit": True, "fix_leaks": True})  # warm cache
     yield
     task.cancel()
 
@@ -75,7 +77,7 @@ app.mount("/api/uploads", StaticFiles(directory=cfg.UPLOADS_DIR), name="uploads"
 @app.get("/api/health")
 def health():
     return {"ok": True, "channel": engine.notifier.channel, "llm": bool(cfg.GROQ_API_KEY),
-            "bin_model": detectors.bin_model() is not None}
+            "bin_model": detectors.bin_model() is not None, "cv_backend": detectors.cv_backend()}
 
 
 @app.get("/api/campus")

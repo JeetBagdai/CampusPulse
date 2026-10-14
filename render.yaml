@@ -1,0 +1,21 @@
+# Render Blueprint: New > Blueprint > pick this repo. Secrets are entered in the Render dashboard.
+services:
+  - type: web
+    name: campuspulse
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NOTIFIER
+        value: telegram
+      - key: CV_BACKEND
+        value: onnx
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHATS
+        sync: false

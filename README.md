@@ -2,47 +2,46 @@
 
 **Code Clash 2.0 · PS2: AI-Powered Sustainable Campus**
 
-Every Indian college does its green audit (NAAC Criterion 7) once a year, by hand. CampusPulse does it every second. Computer vision and sensors catch energy waste, water leaks, overflowing bins and empty booked rooms. Each issue is shown live on a 3D digital twin and priced in ₹ and CO₂. Generative AI then dispatches the fix on WhatsApp in the staff member's own language and writes the NAAC report.
+Every Indian college does its green audit (NAAC Criterion 7) once a year, by hand. CampusPulse does it continuously, on a live digital twin of **Dayananda Sagar University, Harohalli**. Computer vision and sensors catch energy waste, water leaks, overflowing bins and underused bookings. Each issue is priced in ₹ and CO₂, sent to the right staff member's phone in their language, verified when fixed, and rolled into a NAAC-ready report.
 
 ## What it does
 
-| | Feature |
+| Feature | Details |
 |---|---|
-| 📷 **Computer vision** | Live camera: YOLO11n person count, light state, fan and tap motion. Faces are blurred and nothing is stored. Optional fine-tuned bin model. |
-| 🏫 **Digital twin** | 3D campus with 31 rooms, 10 bins and 6 washroom water meters. Live state over WebSocket. Rooms change colour by status. |
-| 🧠 **Fusion rules** | Energy waste (empty room with power on), water leak (night flow vs. expected), bin overflow (+ time-to-full forecast), ghost bookings (timetable vs. occupancy). |
-| 💬 **WhatsApp work orders** | AI work order sent to the right staff member in **English / हिन्दी / ಕನ್ನಡ**. Staff reply `ACK` / `DONE`, and the twin **verifies the fix** with the next reading. Unanswered P1/P2 issues escalate to the estate manager. |
-| 📸 **Student photo reports** | Scan a location QR → photo → vision LLM + CV verify it → duplicates merge → enters the same work-order loop. |
-| 🧪 **What-if simulator** | Replays 30 days with and without a policy (auto-off, LED retrofit, leak alerts…) → ₹ saved per month, CO₂ and payback. |
-| 📄 **NAAC green audit** | One-click Criterion 7.1 report and weekly report, printable to PDF. |
-| 🤖 **Ask your campus** | Copilot with tool calling over live twin data. |
-| ✅ **Numeric validator** | The LLM writes words; the engine computes numbers. Any number in AI output that isn't in the data is rejected, and IDs and numbers must survive translation. |
+| **Digital twin of DSU Harohalli** | Real building outlines, floors, roads and grounds from OpenStreetMap. 65 simulated rooms and 12 bins placed inside 10 monitored buildings. Live state over WebSocket. |
+| **Computer vision** | Live camera: YOLO11n people count, light state (calibrated per room), fan motion. Faces are blurred and nothing is stored. |
+| **Trained bin model** | YOLO11n fine-tuned on Garbage_Fill_Level (Empty / Half / Overflow): **90% of held-out photos correct, mAP50 0.898**. See `training/`. |
+| **Detection rules** | Energy waste (empty room, power on), water leak (flow vs. expected), bin overflow (+ time-to-full forecast), underused booking (timetable vs. occupancy). |
+| **Staff work orders** | AI-written work order sent on **Telegram** to the right role, in **English / हिन्दी / ಕನ್ನಡ** (each person chooses). Staff tap **Noted / Done**, and the twin **verifies the fix** with the next reading. Unanswered P1/P2 issues escalate to the Estate Manager. WhatsApp (Meta Cloud API, Twilio) uses the same notifier interface. |
+| **Student photo reports** | Scan a location QR → photo → trained model + vision LLM verify it → duplicates merge → same work-order loop. |
+| **What-if simulator** | Replays 30 days with and without a policy (auto-off, LED retrofit, leak alerts, releasing underused bookings) → ₹ per month, CO₂ and payback. |
+| **NAAC green audit** | Criterion 7.1 report and weekly report generated from live data, printable to PDF. |
+| **Ask your campus** | Copilot with tool calling over live twin data. |
+| **Numeric validator** | The LLM writes words; the engine computes numbers. AI text with a number not in the data is replaced by a template; IDs and numbers must survive translation. |
 
 ## Architecture
 
 ```
-React + Three.js twin  ──WebSocket──►  FastAPI
-  Cameras · Work orders · What-if        ├─ DataSource (MockSource simulator → swap for MQTT / BMS)
-  Reports · Copilot · /report (mobile)   ├─ Twin engine: fusion rules, pricing, lifecycle, escalation
-                                         ├─ CV: YOLO11n + OpenCV (CPU)
-                                         ├─ GenAI (Groq): work orders, translation, copilot, reports
-                                         │    └─ numeric validator
-                                         └─ Notifier: Meta WhatsApp Cloud API | Twilio | in-app
+React + Three.js twin ──WebSocket──► FastAPI
+  Work orders · Cameras · What-if    ├─ DataSource (simulator → swap for MQTT / BMS meters)
+  Reports · Copilot · /report        ├─ Twin engine: detection rules, pricing, lifecycle, escalation
+                                     ├─ CV: YOLO11n (people + bin model) on ONNX Runtime or PyTorch
+                                     ├─ GenAI (Groq): work orders, translation, copilot, reports + validator
+                                     └─ Notifier: Telegram | Meta WhatsApp Cloud API | Twilio | in-app
 ```
 
-- **Data:** sensor data is **simulated**, calibrated to real tariffs, the CEA grid emission factor and real fixture wattages (see `backend/app/config.py`). CV inference is real. To use real sensors, write a new `DataSource` class; the engine doesn't change.
-- **Privacy:** frames are processed in memory, head regions are blurred, and only counts are kept.
-- **Runs on CPU:** no GPU needed.
+- **Data:** building geometry is real (© OpenStreetMap contributors, ODbL). Rooms, sensors and readings are **simulated**, priced with tariff, water-rate and CEA grid-emission constants in `backend/app/config.py`. CV inference is real. To connect real meters, write a new `DataSource`; the engine doesn't change.
+- **Privacy:** camera frames are processed in memory, head regions are blurred, and only counts are kept.
+- **Runs on CPU:** no GPU needed (ONNX Runtime, ~50–60 ms per frame).
 
 ## Run locally
 
 ```bash
 # backend
 cd backend
-python -m venv .venv && .venv/Scripts/activate      # (Linux/macOS: source .venv/bin/activate)
-pip install -r requirements.txt
-cp .env.example .env                                  # add GROQ_API_KEY (free at console.groq.com)
-python scripts/gen_campus.py                          # regenerate the mock campus (optional)
+python -m venv .venv && .venv/Scripts/activate      # Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt                       # or requirements-render.txt for the slim ONNX-only setup
+cp .env.example .env                                  # add GROQ_API_KEY (free at console.groq.com) and optionally TELEGRAM_BOT_TOKEN
 uvicorn app.main:app --port 8002
 
 # frontend (new terminal)
@@ -53,15 +52,25 @@ npm run dev                                           # http://localhost:5173
 
 Press **Ctrl+D** in the app for demo controls: inject scenarios, change speed, jump in time.
 
+`CV_BACKEND` selects the vision runtime: `auto` (default: ONNX if `backend/models/*.onnx` exist, else PyTorch), `onnx` or `torch`.
+
+## Deploy (Render, free tier)
+
+`render.yaml` + `Dockerfile.render` deploy the whole app as one service (the backend serves the built frontend), using ONNX Runtime so it fits in 512 MB.
+Render → **New → Blueprint** → this repo, then set the secrets `GROQ_API_KEY`, `TELEGRAM_BOT_TOKEN` and optionally `TELEGRAM_CHATS` (saved role links).
+`Dockerfile` is the full PyTorch image; git tag `v1-pytorch` is the version before the ONNX switch.
+
 ## Tests
 
 ```bash
 cd backend && python -m pytest -q
 ```
 
-## Deploy (single service)
+## Credits
 
-`Dockerfile` builds the frontend and serves it from FastAPI on port 7860 (Hugging Face Spaces Docker, Render, Railway). Set the `.env` values as the platform's secrets. Then set `PUBLIC_BASE_URL` and `FRONTEND_URL` to the deployed URL, and the Meta webhook to `https://<app>/api/wa/webhook`.
+- Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL).
+- Bin dataset: *Garbage_Fill_Level* by charuka-edirisinghe, Roboflow Universe (CC BY 4.0).
+- YOLO11 by Ultralytics.
 
 ## Team
 

@@ -1,12 +1,13 @@
 """Computer-vision detectors. All run on CPU.
 
-- people: YOLO11n (COCO 'person'), OpenCV HOG fallback
+- people: YOLO11n (COCO 'person') on ONNX Runtime or PyTorch, OpenCV HOG fallback
 - lights: frame brightness vs. per-camera calibration (no training needed)
 - fan / tap: frame-difference motion energy inside a region of interest
-- bins: optional fine-tuned YOLO model at models/bin.pt (see training/)
+- bins: fine-tuned YOLO model at models/bin.onnx or bin.pt (see training/)
 - privacy: faces + head regions blurred before anything is shown or stored
 """
 import base64
+import os
 import threading
 from collections import deque
 
@@ -27,12 +28,32 @@ _face = (cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_
 DEFAULT_ROIS = {"fan": [0.30, 0.0, 0.40, 0.35], "tap": [0.30, 0.35, 0.40, 0.40]}
 
 
+# CV_BACKEND: auto (ONNX if the .onnx files exist, else PyTorch) | onnx | torch
+CV_BACKEND = os.getenv("CV_BACKEND", "auto").lower()
+
+
+def _onnx(name: str):
+    path = MODELS_DIR / name
+    if CV_BACKEND == "torch" or not path.exists():
+        return None
+    try:
+        from .onnx_yolo import OnnxYolo
+        return OnnxYolo(path)
+    except ImportError:
+        return None
+
+
 def _person_model():
+    """('onnx', model) or ('torch', model)."""
     global _person
     if _person is None:
-        from ultralytics import YOLO
-        MODELS_DIR.mkdir(exist_ok=True)
-        _person = YOLO(str(MODELS_DIR / "yolo11n.pt"))
+        m = _onnx("people.onnx")
+        if m is not None:
+            _person = ("onnx", m)
+        else:
+            from ultralytics import YOLO
+            MODELS_DIR.mkdir(exist_ok=True)
+            _person = ("torch", YOLO(str(MODELS_DIR / "yolo11n.pt")))
     return _person
 
 
@@ -40,20 +61,29 @@ def bin_model():
     global _bin, _bin_checked
     if not _bin_checked:
         _bin_checked = True
-        path = MODELS_DIR / "bin.pt"
-        if path.exists():
+        m = _onnx("bin.onnx")
+        if m is not None:
+            _bin = ("onnx", m)
+        elif (MODELS_DIR / "bin.pt").exists() and CV_BACKEND != "onnx":
             from ultralytics import YOLO
-            _bin = YOLO(str(path))
+            _bin = ("torch", YOLO(str(MODELS_DIR / "bin.pt")))
     return _bin
+
+
+def cv_backend() -> str:
+    return _person_model()[0]
 
 
 def detect_people(img: np.ndarray) -> list[list[float]]:
     """[[x1, y1, x2, y2, conf], ...] in pixels."""
     try:
+        kind, model = _person_model()
         with _lock:
-            res = _person_model()(img, classes=[0], conf=0.4, imgsz=480, verbose=False)[0]
+            if kind == "onnx":
+                return [[x1, y1, x2, y2, c] for x1, y1, x2, y2, c, _ in model(img, conf=0.4, classes=[0])]
+            res = model(img, classes=[0], conf=0.4, imgsz=480, verbose=False)[0]
         return [[*map(float, b.xyxy[0].tolist()), float(b.conf[0])] for b in res.boxes]
-    except Exception:  # noqa: BLE001 - fall back to HOG if YOLO is unavailable
+    except Exception:  # noqa: BLE001 - fall back to HOG if no detector is available
         global _hog
         if _hog is None:
             _hog = cv2.HOGDescriptor()
@@ -63,30 +93,28 @@ def detect_people(img: np.ndarray) -> list[list[float]]:
 
 
 def detect_bin(img: np.ndarray) -> tuple[str | None, float]:
-    """('empty'|'full'|'overflow', conf) using models/bin.pt, or (None, 0) if no model."""
-    model = bin_model()
-    if model is None:
+    """('empty'|'half'|'full'|'overflow', conf) from the trained bin model, or (None, 0) if no model."""
+    loaded = bin_model()
+    if loaded is None:
         return None, 0.0
-    with _lock:
-        res = model(img, conf=0.35, verbose=False)[0]
-    names = res.names
+    kind, model = loaded
     best, conf = None, 0.0
-    if getattr(res, "probs", None) is not None:  # classification model
-        idx = int(res.probs.top1)
-        best, conf = names[idx].lower(), float(res.probs.top1conf)
-    else:
-        for b in res.boxes:
-            n, c = names[int(b.cls[0])].lower(), float(b.conf[0])
-            if c > conf:
-                best, conf = n, c
+    with _lock:
+        if kind == "onnx":
+            for *_, c, k in model(img, conf=0.35):
+                if c > conf:
+                    best, conf = model.names[k].lower(), c
+        else:
+            res = model(img, conf=0.35, verbose=False)[0]
+            for b in res.boxes:
+                n, c = res.names[int(b.cls[0])].lower(), float(b.conf[0])
+                if c > conf:
+                    best, conf = n, c
     if best is None:
         return None, 0.0
-    if "over" in best:
-        return "overflow", conf
-    if "full" in best:
-        return "full", conf
-    if "empty" in best:
-        return "empty", conf
+    for key, label in (("over", "overflow"), ("full", "full"), ("empty", "empty"), ("half", "half")):
+        if key in best:
+            return label, conf
     return best, conf
 
 

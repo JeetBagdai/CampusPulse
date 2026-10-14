@@ -1,0 +1,13 @@
+# Slim runtime for hosting (Render free tier, 512 MB): ONNX Runtime instead of PyTorch/Ultralytics.
+# Full dev/training dependencies are in requirements.txt.
+fastapi
+uvicorn[standard]
+python-dotenv
+httpx
+twilio
+python-multipart
+pillow
+numpy
+opencv-python-headless
+qrcode
+onnxruntime

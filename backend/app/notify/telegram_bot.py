@@ -8,6 +8,7 @@ with the caption "REPORT <location>".
 import asyncio
 import json
 import logging
+import os
 
 import httpx
 
@@ -29,7 +30,9 @@ class TelegramBot(Notifier):
 
     def __init__(self):
         self.api = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}"
-        data = json.loads(CHATS_FILE.read_text()) if CHATS_FILE.exists() else {}
+        # hosted disks reset on deploy, so role links can also come from the TELEGRAM_CHATS secret
+        raw = CHATS_FILE.read_text() if CHATS_FILE.exists() else os.getenv("TELEGRAM_CHATS", "")
+        data = json.loads(raw) if raw.strip() else {}
         if "roles" not in data:  # older flat {role: chat_id} format
             data = {"roles": data, "langs": {}}
         self.chats: dict[str, int] = data["roles"]
