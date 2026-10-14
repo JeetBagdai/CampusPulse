@@ -1,0 +1,45 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Data / runtime
+*.db
+*.sqlite
+backend/uploads/
+runs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Auto-downloaded YOLO weights (bin.pt may be committed)
+backend/models/yolo11n.pt
+backend/data/telegram_chats.json
+training/data/
+training/runs/
+backend/data/camera_calibration.json
+
+# downloaded/pretrained weights (only the trained bin model is committed)
+*.pt
+!backend/models/bin.pt
+weights/
+training/runs_train.log
+# Ultralytics box-level matrices are misleading; use training/bin_confusion_matrix.png
+training/confusion_matrix.png
+training/confusion_matrix_normalized.png

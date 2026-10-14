@@ -1,0 +1,79 @@
+{
+  "type": {
+    "ENERGY_WASTE": {
+      "en": "Energy waste",
+      "hi": "बिजली की बर्बादी",
+      "kn": "ವಿದ್ಯುತ್ ಪೋಲು"
+    },
+    "WATER_LEAK": {
+      "en": "Water leak",
+      "hi": "पानी का रिसाव",
+      "kn": "ನೀರಿನ ಸೋರಿಕೆ"
+    },
+    "BIN_OVERFLOW": {
+      "en": "Bin overflowing",
+      "hi": "कूड़ेदान भरा हुआ",
+      "kn": "ಕಸದ ಬುಟ್ಟಿ ತುಂಬಿದೆ"
+    },
+    "UNDERUSED_BOOKING": {
+      "en": "Underused booking",
+      "hi": "कम उपयोग वाली बुकिंग",
+      "kn": "ಕಡಿಮೆ ಬಳಕೆಯ ಬುಕಿಂಗ್"
+    },
+    "LITTER": {
+      "en": "Litter reported",
+      "hi": "कचरा फैला है",
+      "kn": "ಕಸ ಹರಡಿದೆ"
+    }
+  },
+  "steps": {
+    "en": "Steps",
+    "hi": "कदम",
+    "kn": "ಹಂತಗಳು"
+  },
+  "loss": {
+    "en": "Loss: ₹{rate}/hour",
+    "hi": "नुकसान: ₹{rate}/घंटा",
+    "kn": "ನಷ್ಟ: ₹{rate}/ಗಂಟೆ"
+  },
+  "reply_hint": {
+    "en": "Tap Noted when you start and Done when it is fixed, or reply NOTED / DONE {wo} (photo optional).",
+    "hi": "काम शुरू करने पर Noted दबाएँ और ठीक होने पर Done दबाएँ, या NOTED / DONE {wo} लिखकर भेजें (फोटो वैकल्पिक)।",
+    "kn": "ಕೆಲಸ ಆರಂಭಿಸಿದಾಗ Noted ಒತ್ತಿ, ಸರಿಪಡಿಸಿದ ನಂತರ Done ಒತ್ತಿ, ಅಥವಾ NOTED / DONE {wo} ಎಂದು ಕಳುಹಿಸಿ (ಫೋಟೋ ಐಚ್ಛಿಕ)."
+  },
+  "ack": {
+    "en": "Noted. {wo} is now in progress.",
+    "hi": "ठीक है। {wo} अब प्रगति में है।",
+    "kn": "ಸರಿ. {wo} ಈಗ ಪ್ರಗತಿಯಲ್ಲಿದೆ."
+  },
+  "done_pending": {
+    "en": "Thanks. Verifying {target} with the next sensor/camera reading...",
+    "hi": "धन्यवाद। अगली सेंसर/कैमरा रीडिंग से {target} की जाँच हो रही है...",
+    "kn": "ಧನ್ಯವಾದಗಳು. ಮುಂದಿನ ಸೆನ್ಸರ್/ಕ್ಯಾಮೆರಾ ಓದುವಿಕೆಯಿಂದ {target} ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."
+  },
+  "verified": {
+    "en": "Verified: {target} is fixed. ₹{saved} saved. Thank you.",
+    "hi": "पुष्टि: {target} ठीक हो गया। ₹{saved} की बचत। धन्यवाद।",
+    "kn": "ದೃಢೀಕರಿಸಲಾಗಿದೆ: {target} ಸರಿಯಾಗಿದೆ. ₹{saved} ಉಳಿತಾಯ. ಧನ್ಯವಾದಗಳು."
+  },
+  "not_fixed": {
+    "en": "{target} still shows the problem on the latest reading. Please re-check {wo}.",
+    "hi": "ताज़ा रीडिंग में {target} पर समस्या अभी भी है। कृपया {wo} दोबारा जाँचें।",
+    "kn": "ಇತ್ತೀಚಿನ ಓದುವಿಕೆಯಲ್ಲಿ {target} ನಲ್ಲಿ ಸಮಸ್ಯೆ ಇನ್ನೂ ಇದೆ. ದಯವಿಟ್ಟು {wo} ಮತ್ತೆ ಪರಿಶೀಲಿಸಿ."
+  },
+  "already_clear": {
+    "en": "{wo} was already cleared. Thank you.",
+    "hi": "{wo} पहले ही ठीक हो चुका है। धन्यवाद।",
+    "kn": "{wo} ಈಗಾಗಲೇ ಸರಿಯಾಗಿದೆ. ಧನ್ಯವಾದಗಳು."
+  },
+  "unknown": {
+    "en": "CampusPulse: tap Noted / Done on a work order, or reply NOTED / DONE WO-12. To report a problem, send a photo with REPORT <location code>.",
+    "hi": "CampusPulse: वर्क ऑर्डर पर Noted / Done दबाएँ, या NOTED / DONE WO-12 भेजें। समस्या बताने के लिए REPORT <स्थान कोड> के साथ फोटो भेजें।",
+    "kn": "CampusPulse: ವರ್ಕ್ ಆರ್ಡರ್‌ನಲ್ಲಿ Noted / Done ಒತ್ತಿ, ಅಥವಾ NOTED / DONE WO-12 ಕಳುಹಿಸಿ. ಸಮಸ್ಯೆ ತಿಳಿಸಲು REPORT <ಸ್ಥಳ ಕೋಡ್> ಜೊತೆ ಫೋಟೋ ಕಳುಹಿಸಿ."
+  },
+  "lang_set": {
+    "en": "Language set to English. Change it any time with /language.",
+    "hi": "भाषा हिन्दी पर सेट हो गई। इसे कभी भी /language से बदलें।",
+    "kn": "ಭಾಷೆಯನ್ನು ಕನ್ನಡಕ್ಕೆ ಹೊಂದಿಸಲಾಗಿದೆ. /language ಮೂಲಕ ಯಾವಾಗ ಬೇಕಾದರೂ ಬದಲಿಸಿ."
+  }
+}

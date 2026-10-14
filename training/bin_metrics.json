@@ -1,0 +1,57 @@
+{
+  "mAP50": 0.898,
+  "mAP50_95": 0.643,
+  "precision": 0.852,
+  "recall": 0.88,
+  "per_class": {
+    "Empty": {
+      "precision": 0.9,
+      "recall": 0.899,
+      "mAP50": 0.875
+    },
+    "Half": {
+      "precision": 0.775,
+      "recall": 1.0,
+      "mAP50": 0.983
+    },
+    "Overflow": {
+      "precision": 0.881,
+      "recall": 0.739,
+      "mAP50": 0.838
+    }
+  },
+  "eval_images": "valid + test (40 images)",
+  "dataset": "Garbage_Fill_Level v2 (Roboflow Universe, CC BY 4.0)",
+  "image_level": {
+    "accuracy": 0.9,
+    "correct": 36,
+    "total": 40,
+    "overflow_recall": 0.85,
+    "matrix_rows_true_cols_pred": [
+      [
+        9,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        10,
+        0,
+        0
+      ],
+      [
+        0,
+        2,
+        17,
+        1
+      ]
+    ],
+    "columns": [
+      "Empty",
+      "Half",
+      "Overflow",
+      "None"
+    ]
+  }
+}
