@@ -116,9 +116,9 @@ cd backend && python -m pytest -q
 
 ## Team
 
-| Role | Member |
-|---|---|
-| CV lead | _name_ |
-| Backend / twin lead | _name_ |
-| Frontend lead | _name_ |
-| GenAI + pitch lead | _name_ |
+| Member | GitHub | Role |
+|---|---|---|
+| Jeet Bagdai | [@JeetBagdai](https://github.com/JeetBagdai) | _role_ |
+| Sohan Vinod | [@Sohan258oss](https://github.com/Sohan258oss) | _role_ |
+| Chiranth Yadalam | [@ChiranthYadalam](https://github.com/ChiranthYadalam) | _role_ |
+| _name_ | [@agkkk](https://github.com/agkkk) | _role_ |
