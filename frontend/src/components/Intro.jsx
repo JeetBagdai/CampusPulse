@@ -1,22 +1,19 @@
-// Full-screen intro clip (2 s) played once per browser session, then fades into the app.
+// Full-screen logo clip (2 s) played on every full page load, then fades into the app.
 import { useEffect, useRef, useState } from 'react'
+import { useStore } from '../store'
 
-const KEY = 'cp_intro_played'
-
-function shouldPlay() {
-  if (new URLSearchParams(location.search).has('skipintro')) return false
-  try { return sessionStorage.getItem(KEY) !== '1' } catch { return true }
-}
+const shouldPlay = () => !new URLSearchParams(location.search).has('skipintro')
 
 export default function Intro() {
   const [phase, setPhase] = useState(() => (shouldPlay() ? 'play' : 'gone')) // play -> fade -> gone
   const video = useRef(null)
+  const setIntroDone = useStore((s) => s.setIntroDone)
 
   const finish = () => setPhase((p) => (p === 'play' ? 'fade' : p))
 
   useEffect(() => {
+    if (phase === 'gone') { setIntroDone(); return }
     if (phase === 'play') {
-      try { sessionStorage.setItem(KEY, '1') } catch { /* private mode: plays again next load */ }
       video.current?.play().catch(finish) // autoplay blocked: skip straight to the app
       const failsafe = setTimeout(finish, 4500) // never hold the app back if the clip stalls
       return () => clearTimeout(failsafe)
@@ -25,7 +22,7 @@ export default function Intro() {
       const t = setTimeout(() => setPhase('gone'), 500)
       return () => clearTimeout(t)
     }
-  }, [phase])
+  }, [phase, setIntroDone])
 
   if (phase === 'gone') return null
   return (

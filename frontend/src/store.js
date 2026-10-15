@@ -12,6 +12,7 @@ export const useStore = create((set, get) => ({
   phoneOpen: false,
   tourOn: false,
   welcomeOpen: false,
+  introDone: false, // the logo clip has finished (or was skipped)
 
   init: async () => {
     if (get().campus || get().initing) return
@@ -47,6 +48,7 @@ export const useStore = create((set, get) => ({
   startTour: () => set({ tourOn: true, welcomeOpen: false, demoOpen: false, copilotOpen: false }),
   stopTour: () => set({ tourOn: false }),
   setWelcome: (open) => set({ welcomeOpen: open }),
+  setIntroDone: () => set({ introDone: true }),
 }))
 
 export const STATUS_COLOR = {

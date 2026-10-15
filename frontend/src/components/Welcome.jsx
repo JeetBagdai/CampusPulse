@@ -4,14 +4,6 @@ import { Box, Eye, PlayCircle, Sparkles, X } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useStore } from '../store'
 
-const SEEN_KEY = 'cp_welcome_v1'
-
-function seen() {
-  try { return localStorage.getItem(SEEN_KEY) === '1' } catch { return false }
-}
-function markSeen() {
-  try { localStorage.setItem(SEEN_KEY, '1') } catch { /* private mode: show again next time */ }
-}
 
 const PILLARS = [
   [Eye, 'Computer vision', 'YOLO spots empty rooms with lights on; a custom-trained model detects overflowing bins (90% accurate).'],
@@ -23,11 +15,14 @@ export default function Welcome() {
   const { welcomeOpen, setWelcome, startTour, campus } = useStore()
   const bot = useStore((s) => s.snap?.bot?.username)
   const telegram = useStore((s) => s.snap?.channel === 'telegram')
+  const introDone = useStore((s) => s.introDone)
 
-  // ?skipintro hides the welcome (screenshots, embeds)
-  useEffect(() => { if (!seen() && !new URLSearchParams(location.search).has('skipintro')) setWelcome(true) }, [setWelcome])
+  // shown on every full page load, right after the logo clip; ?skipintro hides it (screenshots, embeds)
+  useEffect(() => {
+    if (introDone && !new URLSearchParams(location.search).has('skipintro')) setWelcome(true)
+  }, [introDone, setWelcome])
   if (!welcomeOpen) return null
-  const close = () => { markSeen(); setWelcome(false) }
+  const close = () => setWelcome(false)
   const judgeLink = bot ? `https://t.me/${bot}?start=judge` : null
 
   return (
