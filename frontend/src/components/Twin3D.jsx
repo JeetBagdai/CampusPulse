@@ -1,7 +1,7 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Shape, Vector3 } from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Edges, GizmoHelper, GizmoViewport, Line, OrbitControls } from '@react-three/drei'
+import { Edges, Line, OrbitControls } from '@react-three/drei'
 import { Camera, LocateFixed } from 'lucide-react'
 import { STATUS_COLOR, TYPE_META, useStore } from '../store'
 import { TypeIcon } from './Icons'
@@ -170,8 +170,6 @@ export default function Twin3D() {
   const hoverRoom = hover && campus.rooms.find((r) => r.id === hover.id)
   const hoverLive = hover && snap.rooms[hover.id]
   const { target, camera } = campus.view
-  // keep the axis gizmo clear of the side panel (desktop) / header (phone)
-  const gizmoMargin = typeof window !== 'undefined' && window.innerWidth >= 768 ? [440, 90] : [56, 150]
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -199,9 +197,6 @@ export default function Twin3D() {
           <Bin key={b.id} bin={b} fill={snap.bins[b.id]?.fill} selected={selected === b.id} onSelect={select} />
         ))}
         <Projector points={points} els={els} />
-        <GizmoHelper alignment="top-right" margin={gizmoMargin}>
-          <GizmoViewport axisColors={[VP.axisX, VP.axisZ, '#4f86d6']} labelColor="#111" axisHeadScale={0.9} />
-        </GizmoHelper>
       </Canvas>
 
       {campus.buildings.map((b) => {
