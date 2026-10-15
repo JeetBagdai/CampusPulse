@@ -112,7 +112,7 @@ cd backend && python -m pytest -q
 
 - Map data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL).
 - Bin dataset: *Garbage_Fill_Level* by charuka-edirisinghe, Roboflow Universe (CC BY 4.0).
-- YOLO11 by Ultralytics.
+- YOLO11 by Ultralytics
 
 ## Team
 
