@@ -1,5 +1,5 @@
 # CampusPulse: continuous green audit for college campuses
-hello
+
 **Code Clash 2.0 · PS2: AI-Powered Sustainable Campus** (computer vision + digital twin + generative AI)
 
 Every Indian college does its green audit (NAAC Criterion 7) once a year, by hand. CampusPulse does it continuously, on a live digital twin of **Dayananda Sagar University, Harohalli**. Computer vision and sensors catch energy waste, water leaks, overflowing bins and underused bookings. Each issue is priced in ₹ and CO₂, sent to the right staff member's phone in their language, verified when fixed, and rolled into a NAAC-ready report.
