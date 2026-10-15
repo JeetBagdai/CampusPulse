@@ -81,6 +81,27 @@ const RoomBox = memo(function RoomBox({ room, status, selected, hovered, onSelec
     if (mat.current && alert) mat.current.emissiveIntensity = 0.35 + 0.35 * Math.sin(clock.elapsedTime * 4)
   })
 
+  // rooms carry a slice of the building's real outline; older data falls back to a box
+  const shape = useMemo(() => (room.footprint ? shapeOf(room.footprint) : null), [room.footprint])
+  const events = {
+    onPointerMove: (e) => { e.stopPropagation(); onHover(room.id, e.nativeEvent) },
+    onPointerOut: () => onHover(null),
+    onClick: (e) => { e.stopPropagation(); onSelect(room.id) },
+  }
+  const material = (
+    <meshStandardMaterial ref={mat} color={color} emissive={color} transparent
+      emissiveIntensity={status === 'fixed' ? 0.4 : 0.05} opacity={status === 'idle' ? 0.55 : 0.9} roughness={0.5} />
+  )
+  if (shape) {
+    return (
+      <mesh rotation={FLAT} position={[0, y + 0.3, 0]} {...events}>
+        <extrudeGeometry args={[shape, { depth: h, bevelEnabled: false }]} />
+        {material}
+        <Edges color={selected ? VP.select : hovered ? '#e0e0e0' : VP.solidEdge} threshold={20} />
+      </mesh>
+    )
+  }
+
   return (
     <mesh position={[x, y + h / 2 + 0.3, z]} rotation={[0, room.rot || 0, 0]}
       onPointerMove={(e) => { e.stopPropagation(); onHover(room.id, e.nativeEvent) }}

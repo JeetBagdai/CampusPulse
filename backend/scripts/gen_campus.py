@@ -94,6 +94,70 @@ def local_to_world(c, a, u, v):
     return [round(c[0] + u * math.cos(a) - v * math.sin(a), 2), round(c[1] + u * math.sin(a) + v * math.cos(a), 2)]
 
 
+def clip_rect(poly, u0, u1, v0, v1):
+    """Sutherland-Hodgman: clip a polygon (local u,v coords) to the rectangle [u0,u1] x [v0,v1]."""
+    def clip(pts, inside, cross):
+        out = []
+        for i, cur in enumerate(pts):
+            prev = pts[i - 1]
+            if inside(cur):
+                if not inside(prev):
+                    out.append(cross(prev, cur))
+                out.append(cur)
+            elif inside(prev):
+                out.append(cross(prev, cur))
+        return out
+
+    def at_u(k):
+        return lambda p, q: (k, p[1] + (q[1] - p[1]) * (k - p[0]) / (q[0] - p[0]))
+
+    def at_v(k):
+        return lambda p, q: (p[0] + (q[0] - p[0]) * (k - p[1]) / (q[1] - p[1]), k)
+
+    pts = list(poly)
+    for inside, cross in ((lambda p: p[0] >= u0, at_u(u0)), (lambda p: p[0] <= u1, at_u(u1)),
+                          (lambda p: p[1] >= v0, at_v(v0)), (lambda p: p[1] <= v1, at_v(v1))):
+        if not pts:
+            break
+        pts = clip(pts, inside, cross)
+    return pts
+
+
+def area(pts):
+    return abs(sum(pts[i - 1][0] * p[1] - p[0] * pts[i - 1][1] for i, p in enumerate(pts))) / 2
+
+
+def equal_area_cuts(poly, n, axis, lo, hi, band=None):
+    """Positions along `axis` (0 = u, 1 = v) splitting the polygon into n slices of equal area.
+    `band` limits the other axis to (b0, b1)."""
+    big = 1e6
+    b0, b1 = band or (-big, big)
+
+    def part(k):
+        if axis == 0:
+            return area(clip_rect(poly, lo, k, b0, b1) or [(0, 0)] * 3)
+        return area(clip_rect(poly, -big, big, lo, k) or [(0, 0)] * 3)
+
+    total = part(hi)
+    cuts = [lo]
+    for i in range(1, n):
+        want, a, b = total * i / n, cuts[-1], hi
+        for _ in range(40):  # bisection
+            m = (a + b) / 2
+            a, b = (m, b) if part(m) < want else (a, m)
+        cuts.append((a + b) / 2)
+    return cuts + [hi]
+
+
+def poly_centroid(pts):
+    a = sum(pts[i - 1][0] * p[1] - p[0] * pts[i - 1][1] for i, p in enumerate(pts)) / 2
+    if abs(a) < 1e-6:
+        return centroid(pts)
+    cx = sum((pts[i - 1][0] + p[0]) * (pts[i - 1][0] * p[1] - p[0] * pts[i - 1][1]) for i, p in enumerate(pts)) / (6 * a)
+    cz = sum((pts[i - 1][1] + p[1]) * (pts[i - 1][0] * p[1] - p[0] * pts[i - 1][1]) for i, p in enumerate(pts)) / (6 * a)
+    return cx, cz
+
+
 def timetable():
     """Mon-Sat 9:00-16:00 hourly slots (13:00 lunch). ~70% booked, ~10% of bookings are no-shows."""
     slots = []
@@ -122,17 +186,32 @@ def add_building(osm, code, name, floors, color, plan):
     floors = int(osm.get("levels") or floors)
     buildings.append({"id": code, "name": name, "floors": floors, "color": color, "monitored": True,
                       "footprint": osm["footprint"], "center": [round(c[0], 1), round(c[1], 1)]})
-    L, W = length * 0.86, width * 0.86  # stay inside irregular outlines
+    # building outline in its own axis frame (u along the long side, v across)
+    ring = osm["footprint"][:-1] if osm["footprint"][0] == osm["footprint"][-1] else osm["footprint"]
+    ca, sa = math.cos(a), math.sin(a)
+    local = [((x - c[0]) * ca + (z - c[1]) * sa, -(x - c[0]) * sa + (z - c[1]) * ca) for x, z in ring]
+    L, W = length, width
+    GAP = 0.8  # half the gap left between neighbouring rooms, so each room reads as its own block
     for floor in range(1, floors + 1):
         cells = plan.get(floor) or plan[max(plan)]
         rows = 2 if W > 40 and len(cells) >= 4 else 1
         cols = math.ceil(len(cells) / rows)
         cw, cd = L / cols, W / rows
+        # divide the real outline so every room gets the same floor area (no slivers at odd corners)
+        vcuts = equal_area_cuts(local, rows, 1, -W / 2, W / 2)
+        ucuts = [equal_area_cuts(local, cols, 0, -L / 2, L / 2, (vcuts[r], vcuts[r + 1])) for r in range(rows)]
         n = 0
         for i, rtype in enumerate(cells):
             col, row = i % cols, i // cols
-            u, v = -L / 2 + (col + 0.5) * cw, -W / 2 + (row + 0.5) * cd
-            x, z = local_to_world(c, a, u, v)
+            u0, u1 = ucuts[row][col], ucuts[row][col + 1]
+            v0, v1 = vcuts[row], vcuts[row + 1]
+            cell = clip_rect(local, u0 + (GAP if col else 0.6), u1 - (GAP if col < cols - 1 else 0.6),
+                             v0 + (GAP if row else 0.6), v1 - (GAP if row < rows - 1 else 0.6))
+            if len(cell) < 3 or area(cell) < 4:  # outline doesn't reach this cell: fall back to a small box
+                cell = [(u0 + cw * 0.3, v0 + cd * 0.3), (u1 - cw * 0.3, v0 + cd * 0.3),
+                        (u1 - cw * 0.3, v1 - cd * 0.3), (u0 + cw * 0.3, v1 - cd * 0.3)]
+            shape = [local_to_world(c, a, cu, cv) for cu, cv in cell]
+            x, z = (round(q, 2) for q in poly_centroid(shape))
             if rtype == "washroom":
                 rid = f"{code}-{floor}WR"
             else:
@@ -142,6 +221,7 @@ def add_building(osm, code, name, floors, color, plan):
                     "type": rtype, "building": code, "floor": floor, "capacity": CAPACITY[rtype],
                     "schedule": SCHEDULE[rtype], "pos": [x, (floor - 1) * FLOOR_H, z],
                     "size": [round(cw - 2, 1), FLOOR_H - 1.2, round(cd - 2, 1)], "rot": round(-a, 4),
+                    "footprint": shape,
                     "fixtures": [{"type": t, "count": k} for t, k in FIXTURES[rtype]]}
             if rtype in ("classroom", "lab"):
                 room["timetable"] = timetable()
