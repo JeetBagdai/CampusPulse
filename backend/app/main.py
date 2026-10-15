@@ -74,7 +74,7 @@ app.mount("/api/uploads", StaticFiles(directory=cfg.UPLOADS_DIR), name="uploads"
 
 
 # ------------------------------------------------------------------ state
-@app.get("/api/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 def health():
     return {"ok": True, "channel": engine.notifier.channel, "llm": bool(cfg.GROQ_API_KEY),
             "bin_model": detectors.bin_model() is not None, "cv_backend": detectors.cv_backend()}
@@ -374,7 +374,7 @@ DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 if DIST.exists():
     app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
-    @app.get("/{path:path}")
+    @app.api_route("/{path:path}", methods=["GET", "HEAD"])  # HEAD: uptime monitors
     def spa(path: str):
         f = DIST / path
         if path and f.is_file():
