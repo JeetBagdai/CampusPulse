@@ -50,7 +50,7 @@ export const useStore = create((set, get) => ({
 }))
 
 export const STATUS_COLOR = {
-  idle: '#5b6b75', active: '#2dd4bf', energy: '#fb7185', water: '#3b82f6', underused: '#cbd5e1',
+  idle: '#6e6e6e', active: '#8ab4f8', energy: '#fb7185', water: '#3b82f6', underused: '#e8e8e8',
   litter: '#fbbf24', waste: '#fbbf24', fixed: '#34d399', ok: '#34d399',
 }
 
@@ -59,5 +59,5 @@ export const TYPE_META = {
   WATER_LEAK: { label: 'Water leak', color: '#3b82f6' },
   BIN_OVERFLOW: { label: 'Bin overflow', color: '#fbbf24' },
   LITTER: { label: 'Litter', color: '#fbbf24' },
-  UNDERUSED_BOOKING: { label: 'Underused booking', color: '#cbd5e1' },
+  UNDERUSED_BOOKING: { label: 'Underused booking', color: '#e8e8e8' },
 }

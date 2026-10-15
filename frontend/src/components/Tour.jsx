@@ -183,11 +183,11 @@ export default function Tour() {
     <div className="no-print fixed z-[60] left-1/2 -translate-x-1/2 bottom-[84px] md:bottom-6 w-[calc(100%-16px)] max-w-[620px] glass-strong p-4 pop">
       <div className="flex items-center gap-2 mb-2">
         <span className="chip !text-[11px]">Guided demo · {step + 1}/{steps.current.length}</span>
-        {!ready && <span className="text-[11px] text-teal-200/80 animate-pulse">working on the live twin…</span>}
+        {!ready && <span className="text-[11px] text-blue-200/80 animate-pulse">working on the live twin…</span>}
         <button className="btn !p-1.5 ml-auto" onClick={close} title="Close the demo"><X size={15} /></button>
       </div>
       <div className="h-1 rounded-full bg-white/10 overflow-hidden mb-3">
-        <div className="h-full bg-gradient-to-r from-teal-300 to-emerald-300 transition-all duration-500" style={{ width: `${((step + 1) / steps.current.length) * 100}%` }} />
+        <div className="h-full bg-gradient-to-r from-blue-400 to-blue-300 transition-all duration-500" style={{ width: `${((step + 1) / steps.current.length) * 100}%` }} />
       </div>
       <div className="font-bold text-lg leading-snug">{s.title}</div>
       <div className="text-sm text-slate-300 mt-1 leading-relaxed">{s.text(snapNow)}</div>

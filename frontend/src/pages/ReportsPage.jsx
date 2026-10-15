@@ -12,9 +12,9 @@ function Doc({ r }) {
   const title = r.kind === 'naac' ? 'Green Audit: NAAC Criterion 7.1 (Environment)' : 'Weekly Sustainability Report'
   return (
     <div className="print-page bg-white/95 backdrop-blur-xl ring-1 ring-white/40 text-slate-900 rounded-3xl shadow-2xl max-w-[860px] mx-auto p-5 md:p-10 my-4">
-      <div className="flex items-start border-b-2 border-emerald-600 pb-4 mb-6">
+      <div className="flex items-start border-b-2 border-slate-700 pb-4 mb-6">
         <div>
-          <div className="text-xs uppercase tracking-widest text-emerald-700 font-semibold">CampusPulse · continuous audit</div>
+          <div className="text-xs uppercase tracking-widest text-blue-700 font-semibold">CampusPulse · continuous audit</div>
           <h1 className="text-2xl font-bold mt-1">{title}</h1>
           <div className="text-sm text-slate-500">{f.campus} · {f.period.from} to {f.period.to} ({f.period.days} days)</div>
         </div>
@@ -108,7 +108,7 @@ export default function ReportsPage() {
         <div className="flex gap-1 p-1 rounded-full bg-black/25 border border-white/5">
           {[['naac', 'NAAC green audit (30 days)'], ['weekly', 'Weekly report']].map(([k, l]) => (
             <button key={k} onClick={() => setKind(k)}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${kind === k ? 'bg-teal-400/15 text-teal-100 ring-1 ring-teal-300/30' : 'text-slate-400 hover:text-slate-200'}`}>
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${kind === k ? 'bg-blue-400/15 text-blue-100 ring-1 ring-blue-300/30' : 'text-slate-400 hover:text-slate-200'}`}>
               <FileText size={14} className="inline -mt-0.5 mr-1.5" />{l}</button>
           ))}
         </div>

@@ -7,7 +7,7 @@ import { PriorityChip, SourceChip, TypeIcon } from './Icons'
 const LANGS = [['en', 'EN'], ['hi', 'हिं'], ['kn', 'ಕನ್ನಡ']]
 const STATUS_STYLE = {
   open: 'bg-rose-500/15 text-rose-300', assigned: 'bg-amber-500/15 text-amber-300',
-  in_progress: 'bg-sky-500/15 text-sky-300', resolved: 'bg-cyan-500/15 text-cyan-300',
+  in_progress: 'bg-sky-500/15 text-sky-300', resolved: 'bg-sky-500/15 text-sky-300',
   verified: 'bg-emerald-500/15 text-emerald-300', auto_closed: 'bg-slate-500/15 text-slate-300',
   closed: 'bg-slate-500/15 text-slate-300',
 }
@@ -73,16 +73,16 @@ export default function IssueCard({ issue, compact = false }) {
           {wo && (
             <div className="mt-3 well p-2.5">
               <div className="flex items-center gap-x-2 gap-y-1 text-sm flex-wrap">
-                <span className="font-mono text-emerald-300">{wo.id}</span>
+                <span className="font-mono text-blue-300">{wo.id}</span>
                 <span className="text-slate-300">→ {wo.assignee}</span>
                 <span className="ml-auto chip" title={wo.validator?.rejected_numbers ? `rejected: ${wo.validator.rejected_numbers}` : ''}>
-                  {wo.source === 'llm' ? <><ShieldCheck size={12} className="text-emerald-300" /> AI · numbers verified</> : 'template'}
+                  {wo.source === 'llm' ? <><ShieldCheck size={12} className="text-blue-300" /> AI · numbers verified</> : 'template'}
                 </span>
               </div>
               <div className="font-medium mt-1">{(wo.content[lang] || wo.content.en).title}</div>
               <div className="flex gap-1 mt-2">
                 {LANGS.map(([code, label]) => (
-                  <button key={code} className={`chip !text-[11px] !py-0 ${lang === code ? '!bg-teal-400/25 !text-teal-100' : ''}`}
+                  <button key={code} className={`chip !text-[11px] !py-0 ${lang === code ? '!bg-blue-400/25 !text-blue-100' : ''}`}
                     onClick={() => setLang(lang === code ? null : code)}>{label}</button>
                 ))}
                 <span className="text-xs text-slate-500 ml-1 self-center">sent in {wo.lang.toUpperCase()}</span>

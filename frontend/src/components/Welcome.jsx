@@ -45,7 +45,7 @@ export default function Welcome() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mt-5">
           {PILLARS.map(([Icon, title, text]) => (
             <div key={title} className="well p-3.5">
-              <div className="w-9 h-9 rounded-xl bg-teal-400/15 ring-1 ring-teal-300/25 flex items-center justify-center mb-2"><Icon size={18} className="text-teal-200" /></div>
+              <div className="w-9 h-9 rounded-xl bg-blue-400/15 ring-1 ring-blue-300/25 flex items-center justify-center mb-2"><Icon size={18} className="text-blue-200" /></div>
               <div className="font-bold">{title}</div>
               <div className="text-xs text-slate-400 mt-1 leading-relaxed">{text}</div>
             </div>
@@ -64,7 +64,7 @@ export default function Welcome() {
             <div className="bg-white p-1.5 rounded-lg shrink-0 hidden sm:block"><QRCodeSVG value={judgeLink} size={76} /></div>
             <div className="text-sm min-w-0">
               <div className="font-semibold">Get the staff work orders on your own phone</div>
-              <div className="text-xs text-slate-400 mt-0.5">Open <a className="text-teal-200 underline break-all" href={judgeLink} target="_blank" rel="noreferrer">{judgeLink.replace('https://', '')}</a> in Telegram, tap Start, then play the demo. You'll receive each work order and can tap Done yourself.</div>
+              <div className="text-xs text-slate-400 mt-0.5">Open <a className="text-blue-200 underline break-all" href={judgeLink} target="_blank" rel="noreferrer">{judgeLink.replace('https://', '')}</a> in Telegram, tap Start, then play the demo. You'll receive each work order and can tap Done yourself.</div>
             </div>
           </div>
         )}

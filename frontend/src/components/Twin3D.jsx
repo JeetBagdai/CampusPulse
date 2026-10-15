@@ -1,13 +1,16 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Shape, Vector3 } from 'three'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Edges, Line, OrbitControls } from '@react-three/drei'
+import { Edges, GizmoHelper, GizmoViewport, Line, OrbitControls } from '@react-three/drei'
 import { Camera, LocateFixed } from 'lucide-react'
 import { STATUS_COLOR, TYPE_META, useStore } from '../store'
 import { TypeIcon } from './Icons'
 
 const ALERT = new Set(['energy', 'water', 'underused', 'litter', 'waste'])
 const FLAT = [-Math.PI / 2, 0, 0]
+// Blender-style viewport palette
+const VP = { bg: '#393939', floor: '#3d3d3d', grid: '#4d4d4d', grid2: '#444444', axisX: '#c43c48', axisZ: '#7aa53a',
+  solid: '#9a9a9a', solidEdge: '#2b2b2b', shell: '#b5b5b5', road: '#5e5e5e', path: '#525252', select: '#ffa033' }
 
 // footprint [[x, z], ...] -> Shape in the x/-z plane (extruded upwards after rotating by FLAT)
 function shapeOf(pts) {
@@ -21,7 +24,7 @@ function Footprint({ pts, height, color, opacity, edge }) {
   return (
     <mesh rotation={FLAT}>
       <extrudeGeometry args={[shape, { depth: height, bevelEnabled: false }]} />
-      <meshStandardMaterial color={color} transparent opacity={opacity} depthWrite={false} />
+      <meshStandardMaterial color={color} transparent={opacity < 1} opacity={opacity} depthWrite={opacity >= 1} roughness={0.85} />
       <Edges color={edge} threshold={20} />
     </mesh>
   )
@@ -54,13 +57,13 @@ const StaticMap = memo(function StaticMap({ campus }) {
   const fh = campus.floor_height
   return (
     <group>
-      {map.boundary && <Line points={map.boundary.map(([x, z]) => [x, 0.3, z])} color="#2dd4bf" lineWidth={1.5} dashed dashSize={8} gapSize={6} transparent opacity={0.5} />}
-      {map.pitches.map((p, i) => <Flat key={i} pts={p.footprint} color="#15803d" opacity={0.35} />)}
-      {roads.length > 0 && <Line segments points={roads} color="#3b6b72" lineWidth={2.5} />}
-      {paths.length > 0 && <Line segments points={paths} color="#2a4f55" lineWidth={1} />}
-      {map.context.map((b, i) => <Footprint key={i} pts={b.footprint} height={b.floors * 6} color="#334a52" opacity={0.28} edge="#4b6670" />)}
+      {map.boundary && <Line points={map.boundary.map(([x, z]) => [x, 0.3, z])} color="#8a8a8a" lineWidth={1.2} dashed dashSize={8} gapSize={6} transparent opacity={0.6} />}
+      {map.pitches.map((p, i) => <Flat key={i} pts={p.footprint} color="#4a4a4a" opacity={0.7} />)}
+      {roads.length > 0 && <Line segments points={roads} color={VP.road} lineWidth={2.5} />}
+      {paths.length > 0 && <Line segments points={paths} color={VP.path} lineWidth={1} />}
+      {map.context.map((b, i) => <Footprint key={i} pts={b.footprint} height={b.floors * 6} color={VP.solid} opacity={1} edge={VP.solidEdge} />)}
       {campus.buildings.map((b) => (
-        <Footprint key={b.id} pts={b.footprint} height={b.floors * fh + 0.6} color={b.color} opacity={0.06} edge={b.color} />
+        <Footprint key={b.id} pts={b.footprint} height={b.floors * fh + 0.6} color={VP.shell} opacity={0.14} edge="#d0d0d0" />
       ))}
     </group>
   )
@@ -69,7 +72,7 @@ const StaticMap = memo(function StaticMap({ campus }) {
 const RoomBox = memo(function RoomBox({ room, status, selected, hovered, onSelect, onHover }) {
   const mat = useRef()
   const isWash = room.type === 'washroom'
-  const color = status === 'idle' ? (isWash ? '#1d3b5c' : STATUS_COLOR.idle) : STATUS_COLOR[status]
+  const color = status === 'idle' ? (isWash ? '#5d6470' : STATUS_COLOR.idle) : STATUS_COLOR[status]
   const alert = ALERT.has(status)
   const [x, y, z] = room.pos
   const [w, h, d] = room.size
@@ -86,7 +89,7 @@ const RoomBox = memo(function RoomBox({ room, status, selected, hovered, onSelec
       <boxGeometry args={[w, h, d]} />
       <meshStandardMaterial ref={mat} color={color} emissive={color} transparent
         emissiveIntensity={status === 'fixed' ? 0.4 : 0.05} opacity={status === 'idle' ? 0.55 : 0.9} roughness={0.5} />
-      <Edges color={selected ? '#ffffff' : hovered ? '#94a3b8' : '#2a4a50'} />
+      <Edges color={selected ? VP.select : hovered ? '#e0e0e0' : VP.solidEdge} />
     </mesh>
   )
 })
@@ -99,8 +102,8 @@ const Bin = memo(function Bin({ bin, fill, selected, onSelect }) {
     <group position={[x, 0, z]} scale={2.2} onClick={(e) => { e.stopPropagation(); onSelect(bin.id) }}>
       <mesh position={[0, 1, 0]}>
         <cylinderGeometry args={[0.9, 0.75, 2, 16, 1, true]} />
-        <meshStandardMaterial color="#64748b" transparent opacity={0.35} side={2} />
-        {selected && <Edges color="#fff" />}
+        <meshStandardMaterial color="#8a8a8a" transparent opacity={0.45} side={2} />
+        {selected && <Edges color={VP.select} />}
       </mesh>
       <mesh position={[0, Math.max(0.05, f * 2) / 2, 0]}>
         <cylinderGeometry args={[0.8, 0.72, Math.max(0.05, f * 2), 16]} />
@@ -167,20 +170,26 @@ export default function Twin3D() {
   const hoverRoom = hover && campus.rooms.find((r) => r.id === hover.id)
   const hoverLive = hover && snap.rooms[hover.id]
   const { target, camera } = campus.view
+  // keep the axis gizmo clear of the side panel (desktop) / header (phone)
+  const gizmoMargin = typeof window !== 'undefined' && window.innerWidth >= 768 ? [440, 90] : [56, 150]
 
   return (
     <div className="absolute inset-0 overflow-hidden">
       <Canvas camera={{ position: camera, fov: 40, near: 1, far: 5000 }} onPointerMissed={() => select(null)}
-        dpr={[1, 1.5]} gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}>
-        <ambientLight intensity={0.75} />
-        <directionalLight position={[300, 500, 200]} intensity={1.1} />
+        dpr={[1, 1.5]} gl={{ antialias: true, powerPreference: 'high-performance' }}>
+        <color attach="background" args={[VP.bg]} />
+        <hemisphereLight args={['#ffffff', '#3a3a3a', 1.1]} />
+        <directionalLight position={[300, 500, 200]} intensity={1.4} />
         <ViewOffset />
         <OrbitControls ref={controls} target={target} maxPolarAngle={Math.PI / 2.15} minDistance={40} maxDistance={1600} makeDefault />
         <mesh rotation={FLAT} position={[0, -0.05, 0]}>
-          <planeGeometry args={[1500, 1100]} />
-          <meshStandardMaterial color="#0a2a30" transparent opacity={0.55} />
+          <planeGeometry args={[8000, 8000]} />
+          <meshBasicMaterial color={VP.floor} />
         </mesh>
-        <gridHelper args={[1500, 75, '#1f5058', '#123a40']} />
+        <gridHelper args={[1500, 75, VP.grid, VP.grid2]} position={[0, 0.02, 0]} />
+        {/* X (red) and Z (green) axis lines through the origin, as in Blender */}
+        <Line points={[[-750, 0.1, 0], [750, 0.1, 0]]} color={VP.axisX} lineWidth={1.5} />
+        <Line points={[[0, 0.1, -550], [0, 0.1, 550]]} color={VP.axisZ} lineWidth={1.5} />
         <StaticMap campus={campus} />
         {campus.rooms.map((r) => (
           <RoomBox key={r.id} room={r} status={snap.rooms[r.id]?.status || 'idle'} selected={selected === r.id}
@@ -190,6 +199,9 @@ export default function Twin3D() {
           <Bin key={b.id} bin={b} fill={snap.bins[b.id]?.fill} selected={selected === b.id} onSelect={select} />
         ))}
         <Projector points={points} els={els} />
+        <GizmoHelper alignment="top-right" margin={gizmoMargin}>
+          <GizmoViewport axisColors={[VP.axisX, VP.axisZ, '#4f86d6']} labelColor="#111" axisHeadScale={0.9} />
+        </GizmoHelper>
       </Canvas>
 
       {campus.buildings.map((b) => {
@@ -197,7 +209,7 @@ export default function Twin3D() {
         return (
           <div key={b.id} ref={(el) => { els.current[`b:${b.id}`] = el }}
             className="glass-strong absolute left-0 top-0 px-2.5 py-1 text-[11px] whitespace-nowrap flex items-center gap-1.5 pointer-events-none !rounded-full">
-            <span className="w-2 h-2 rounded-full" style={{ background: b.color, boxShadow: `0 0 8px ${b.color}` }} />
+            <span className="w-2 h-2 rounded-full bg-neutral-300" />
             <span className="font-bold">{b.name}</span>
             {sc && <span className={`font-bold ${sc.score >= 85 ? 'text-emerald-300' : sc.score >= 70 ? 'text-amber-300' : 'text-rose-300'}`}>{sc.score}</span>}
           </div>

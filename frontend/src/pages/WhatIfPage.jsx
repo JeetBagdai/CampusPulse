@@ -49,14 +49,14 @@ export default function WhatIfPage() {
         <p className="text-sm text-slate-400 mt-1">Replays 30 days of campus life with and without the policy, using the same random events, so the only difference is the policy.</p>
         <div className="mt-4">
           <div className="flex justify-between text-sm"><span>Auto-off when room empty</span>
-            <span className="font-mono text-emerald-300">{policy.auto_off_minutes ? `${policy.auto_off_minutes} min` : 'off'}</span></div>
-          <input type="range" min={0} max={60} step={5} value={policy.auto_off_minutes} className="w-full accent-emerald-500"
+            <span className="font-mono text-blue-300">{policy.auto_off_minutes ? `${policy.auto_off_minutes} min` : 'off'}</span></div>
+          <input type="range" min={0} max={60} step={5} value={policy.auto_off_minutes} className="w-full accent-blue-500"
             onChange={(e) => setPolicy({ ...policy, auto_off_minutes: +e.target.value })} />
         </div>
         <div className="space-y-2 mt-3">
           {TOGGLES.map(([k, label, hint]) => (
             <label key={k} className="flex gap-3 items-start p-2 rounded-xl hover:bg-white/5 cursor-pointer">
-              <input type="checkbox" className="mt-1 accent-emerald-500 w-4 h-4" checked={policy[k]} onChange={(e) => setPolicy({ ...policy, [k]: e.target.checked })} />
+              <input type="checkbox" className="mt-1 accent-blue-500 w-4 h-4" checked={policy[k]} onChange={(e) => setPolicy({ ...policy, [k]: e.target.checked })} />
               <div><div className="font-medium text-sm">{label}</div><div className="text-xs text-slate-500">{hint}</div></div>
             </label>
           ))}
@@ -85,7 +85,7 @@ export default function WhatIfPage() {
                     <Tooltip contentStyle={{ background: 'rgba(8,26,32,0.92)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10 }} formatter={(v) => num(v, 2)} />
                     <Legend />
                     <Bar isAnimationActive={false} dataKey="Today" fill="#f43f5e" radius={[6, 6, 0, 0]} />
-                    <Bar isAnimationActive={false} dataKey="With policy" fill="#10b981" radius={[6, 6, 0, 0]} />
+                    <Bar isAnimationActive={false} dataKey="With policy" fill="#6ea0f5" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

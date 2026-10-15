@@ -38,7 +38,7 @@ function TwinStatus({ target }) {
       {issue && (
         <div className="well p-2 mt-2 text-sm flex items-center gap-2">
           <TypeIcon type={issue.type} size={14} />
-          <span className="font-mono text-teal-200">{issue.id}</span>
+          <span className="font-mono text-blue-200">{issue.id}</span>
           <span className="text-slate-300">{TYPE_META[issue.type].label}</span>
           {issue.rate_inr_hr > 0 && <span className="ml-auto text-rose-300">{inr(issue.rate_inr_hr)}/h</span>}
         </div>
@@ -175,7 +175,7 @@ export default function CamerasPage() {
             <div className="flex gap-2 flex-wrap">
               {SAMPLES.map(([k, label]) => (
                 <button key={k} disabled={busy} onClick={() => runSample(k)}
-                  className="group relative w-24 h-20 rounded-xl overflow-hidden ring-1 ring-white/15 hover:ring-teal-300/60 transition">
+                  className="group relative w-24 h-20 rounded-xl overflow-hidden ring-1 ring-white/15 hover:ring-blue-300/60 transition">
                   <img src={`/samples/bin-${k}.jpg`} alt={label} className="w-full h-full object-cover group-hover:scale-105 transition" />
                   <span className="absolute inset-x-0 bottom-0 bg-black/60 text-[11px] font-semibold py-0.5">{label}</span>
                 </button>
@@ -212,7 +212,7 @@ export default function CamerasPage() {
               <summary className="text-xs text-slate-400 cursor-pointer select-none">Advanced: calibrate light detection</summary>
               <div className="flex items-center my-2">
                 <div className="text-xs text-slate-400">For the room in front of the camera</div>
-                <span className={`chip ml-auto !text-[11px] ${calib?.calibrated ? '!bg-emerald-500/20 !text-emerald-200' : ''}`}>
+                <span className={`chip ml-auto !text-[11px] ${calib?.calibrated ? '!bg-blue-500/20 !text-blue-200' : ''}`}>
                   {calib?.calibrated ? `saved · on ${Math.round(calib.calib.on)} / off ${Math.round(calib.calib.off)}` : calib?.calib?.on || calib?.calib?.off ? 'half done' : 'not calibrated'}
                 </span>
               </div>

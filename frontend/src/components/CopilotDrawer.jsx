@@ -46,7 +46,7 @@ export default function CopilotDrawer() {
   return (
     <div className="no-print fixed inset-2 top-16 md:inset-auto md:right-4 md:top-16 md:bottom-4 md:w-[440px] glass-strong flex flex-col shadow-2xl z-50 pop">
       <div className="flex items-center gap-2 p-3 border-b border-line">
-        <Sparkles size={18} className="text-emerald-300" />
+        <Sparkles size={18} className="text-blue-300" />
         <div className="font-semibold">Ask your campus</div>
         <span className="chip ml-1">grounded in live twin data</span>
         <button className="btn !p-1.5 ml-auto" onClick={closeCopilot}><X size={16} /></button>
@@ -60,13 +60,13 @@ export default function CopilotDrawer() {
         )}
         {msgs.map((m, i) => (
           <div key={i} className={m.role === 'user' ? 'flex justify-end' : ''}>
-            <div className={`rounded-xl px-3 py-2 text-sm leading-relaxed ${m.role === 'user' ? 'bg-emerald-600/30 max-w-[85%]' : 'bg-black/30'}`}>
+            <div className={`rounded-xl px-3 py-2 text-sm leading-relaxed ${m.role === 'user' ? 'bg-blue-600/30 max-w-[85%]' : 'bg-black/30'}`}>
               {render(m.content)}
               {m.tools?.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {m.tools.map((t, j) => <span key={j} className="chip !text-[11px]"><Wrench size={11} />{t.name}</span>)}
                   {m.verified
-                    ? <span className="chip !text-[11px] !bg-emerald-500/20 !text-emerald-200"><ShieldCheck size={11} /> numbers verified</span>
+                    ? <span className="chip !text-[11px] !bg-blue-500/20 !text-blue-200"><ShieldCheck size={11} /> numbers verified</span>
                     : <span className="chip !text-[11px] !bg-amber-500/20 !text-amber-200" title={`unverified: ${m.bad?.join(', ')}`}><ShieldAlert size={11} /> check numbers</span>}
                 </div>
               )}

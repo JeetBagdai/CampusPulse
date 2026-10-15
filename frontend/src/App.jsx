@@ -77,7 +77,7 @@ export default function App() {
           {NAV.map(({ to, label }) => (
             <NavLink key={to} to={to} end
               className={({ isActive }) => `px-3 py-1.5 rounded-full text-sm font-semibold transition
-                ${isActive ? 'bg-teal-400/15 text-teal-100 ring-1 ring-teal-300/30' : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'}`}>
+                ${isActive ? 'bg-blue-400/15 text-blue-100 ring-1 ring-blue-300/30' : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'}`}>
               {label}
             </NavLink>
           ))}
@@ -90,9 +90,9 @@ export default function App() {
             <PlayCircle size={16} /><span className="hidden lg:inline">Play demo</span>
           </button>
           <button className="btn !px-2.5" onClick={toggleDemo} title="Try a scenario (Ctrl+D)"><SlidersHorizontal size={16} /></button>
-          <button className={`btn !px-2.5 relative ${phoneOpen ? '!border-teal-300/50' : ''}`} onClick={togglePhone} title="Staff messages">
+          <button className={`btn !px-2.5 relative ${phoneOpen ? '!border-blue-300/50' : ''}`} onClick={togglePhone} title="Staff messages">
             <MessageCircle size={16} />
-            {unread && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-teal-300 shadow-[0_0_8px_#5eead4]" />}
+            {unread && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blue-300 shadow-[0_0_8px_#93c5fd]" />}
           </button>
           <button className="btn btn-primary !px-2.5 md:!px-3.5" onClick={() => openCopilot()}>
             <Sparkles size={16} /><span className="hidden sm:inline">Ask campus</span>
@@ -118,7 +118,7 @@ export default function App() {
       <nav className="no-print md:hidden fixed bottom-0 inset-x-0 z-30 glass-bar border-t border-line grid grid-cols-5 pb-[env(safe-area-inset-bottom)]">
         {NAV.map(({ to, label, short, icon: Icon }) => (
           <NavLink key={to} to={to} end
-            className={({ isActive }) => `flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold ${isActive ? 'text-teal-200' : 'text-slate-400'}`}>
+            className={({ isActive }) => `flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold ${isActive ? 'text-blue-200' : 'text-slate-400'}`}>
             <Icon size={19} />{short || label}
           </NavLink>
         ))}

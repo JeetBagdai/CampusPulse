@@ -48,7 +48,7 @@ export default function DemoPanel() {
       <div className="flex gap-1 items-center flex-wrap">
         <span className="text-sm text-slate-400 mr-1">Simulation speed</span>
         {[1, 5, 15].map((x) => (
-          <button key={x} className={`btn !py-1 ${snap.speed === x ? '!bg-teal-400/25' : ''}`}
+          <button key={x} className={`btn !py-1 ${snap.speed === x ? '!bg-blue-400/25' : ''}`}
             onClick={() => run(() => api.post(`/api/demo/speed?x=${x}`), `speed ${x}×`)}>{x}×</button>
         ))}
       </div>

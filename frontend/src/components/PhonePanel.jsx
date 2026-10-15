@@ -25,7 +25,7 @@ export default function PhonePanel() {
   return (
     <aside className="no-print glass-strong fixed inset-2 top-[64px] md:inset-auto md:right-4 md:top-[68px] md:bottom-4 md:w-[360px] z-40 flex flex-col p-3 pop">
       <div className="flex items-center gap-2 mb-2">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${snap.channel === 'telegram' ? 'bg-[#229ED9]' : 'bg-teal-500'}`}><MessageCircle size={16} className="text-white" /></div>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${snap.channel === 'telegram' ? 'bg-[#229ED9]' : 'bg-blue-500'}`}><MessageCircle size={16} className="text-white" /></div>
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-sm leading-tight truncate">Staff {app}{snap.bot?.username ? ` · @${snap.bot.username}` : ''}</div>
           <div className="text-[11px] text-slate-400 leading-tight">
@@ -35,13 +35,13 @@ export default function PhonePanel() {
       </div>
       {snap.channel === 'telegram' && snap.bot?.username && (
         <a href={`https://t.me/${snap.bot.username}?start=judge`} target="_blank" rel="noreferrer"
-          className="well px-2.5 py-1.5 mb-2 text-[11px] text-slate-300 hover:text-teal-100 block">
-          Get these work orders on your phone: <span className="text-teal-200 underline">t.me/{snap.bot.username}?start=judge</span>
+          className="well px-2.5 py-1.5 mb-2 text-[11px] text-slate-300 hover:text-blue-100 block">
+          Get these work orders on your phone: <span className="text-blue-200 underline">t.me/{snap.bot.username}?start=judge</span>
         </a>
       )}
       <div className="flex gap-1 flex-wrap mb-2">
         {[...ROLES, ['all', 'All']].map(([k, l]) => (
-          <button key={k} onClick={() => setRole(k)} className={`chip ${role === k ? '!bg-emerald-500/25 !text-emerald-200' : ''}`}>{l}</button>
+          <button key={k} onClick={() => setRole(k)} className={`chip ${role === k ? '!bg-blue-500/25 !text-blue-200' : ''}`}>{l}</button>
         ))}
       </div>
       <div className="flex-1 overflow-auto rounded-2xl p-2 space-y-2" style={{ background: 'rgba(0,0,0,0.22)', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -49,8 +49,8 @@ export default function PhonePanel() {
         {feed.map((m) => (
           <div key={m.id} className={`flex ${m.dir === 'in' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[88%] rounded-xl px-2.5 py-1.5 text-[13px] whitespace-pre-wrap leading-snug pop
-              ${m.dir === 'in' ? 'bg-teal-500/30 text-white border border-teal-300/20' : 'bg-white/[0.07] text-slate-100 border border-white/10'}`}>
-              {role === 'all' && <div className="text-[10px] text-emerald-300 mb-0.5">{m.dir === 'in' ? 'from' : 'to'} {ROLE_NAME[m.role] || m.role}</div>}
+              ${m.dir === 'in' ? 'bg-blue-500/30 text-white border border-blue-300/20' : 'bg-white/[0.07] text-slate-100 border border-white/10'}`}>
+              {role === 'all' && <div className="text-[10px] text-blue-300 mb-0.5">{m.dir === 'in' ? 'from' : 'to'} {ROLE_NAME[m.role] || m.role}</div>}
               {m.text}
               {m.dir === 'out' && m.buttons?.length > 0 && m.wo && (
                 <div className="flex gap-1 mt-1.5">
@@ -61,7 +61,7 @@ export default function PhonePanel() {
                 </div>
               )}
               <div className="text-[10px] text-slate-400 text-right mt-0.5">
-                {m.channel === 'console' ? 'in-app' : <><CheckCheck size={11} className="inline -mt-0.5 mr-0.5 text-teal-300" />{m.channel === 'telegram' ? 'Telegram' : 'WhatsApp'}</>}{m.status && !['ok', 'shown in app', 'delivered'].includes(m.status) ? ` · ${m.status}` : ''}
+                {m.channel === 'console' ? 'in-app' : <><CheckCheck size={11} className="inline -mt-0.5 mr-0.5 text-blue-300" />{m.channel === 'telegram' ? 'Telegram' : 'WhatsApp'}</>}{m.status && !['ok', 'shown in app', 'delivered'].includes(m.status) ? ` · ${m.status}` : ''}
               </div>
             </div>
           </div>

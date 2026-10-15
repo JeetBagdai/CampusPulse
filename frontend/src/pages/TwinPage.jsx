@@ -68,7 +68,7 @@ function Drawer({ id }) {
               <span className={`w-1.5 h-1.5 rounded-full ${live.on[f.type] ? 'bg-amber-300 shadow-[0_0_6px_#fcd34d]' : 'bg-slate-600'}`} />{FIX_LABEL[f.type]} ×{f.count}
             </span>
           ))}
-          {live.cv_live && <span className="chip !bg-emerald-500/20 !text-emerald-200"><Video size={12} />live camera</span>}
+          {live.cv_live && <span className="chip !bg-blue-500/20 !text-blue-200"><Video size={12} />live camera</span>}
         </div>
       )}
       {slots.length > 0 && (
@@ -115,7 +115,7 @@ function Trends() {
               <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#64748b' }} interval={2} />
               <YAxis tick={{ fontSize: 10, fill: '#64748b' }} />
               <Tooltip contentStyle={{ background: 'rgba(8,26,32,0.92)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, fontSize: 12 }} />
-              <Area isAnimationActive={false} type="monotone" dataKey="used" stackId="1" stroke="#2dd4bf" fill="#2dd4bf55" name="useful" />
+              <Area isAnimationActive={false} type="monotone" dataKey="used" stackId="1" stroke="#8ab4f8" fill="#8ab4f855" name="useful" />
               <Area isAnimationActive={false} type="monotone" dataKey="wasted" stackId="1" stroke="#fb7185" fill="#fb718566" name="wasted (empty rooms)" />
             </AreaChart>
           </ResponsiveContainer>
@@ -162,7 +162,7 @@ function Overview() {
       <div className="flex gap-1 p-1 rounded-full bg-black/25 border border-white/5 mb-3">
         {TABS.map(([k, l]) => (
           <button key={k} onClick={() => setTab(k)}
-            className={`flex-1 py-1.5 rounded-full text-sm font-semibold transition ${tab === k ? 'bg-teal-400/15 text-teal-100 ring-1 ring-teal-300/30' : 'text-slate-400 hover:text-slate-200'}`}>{l}</button>
+            className={`flex-1 py-1.5 rounded-full text-sm font-semibold transition ${tab === k ? 'bg-blue-400/15 text-blue-100 ring-1 ring-blue-300/30' : 'text-slate-400 hover:text-slate-200'}`}>{l}</button>
         ))}
       </div>
       {tab === 'issues' && (

@@ -117,7 +117,10 @@ async def generate(engine, kind: str) -> dict:
                "Every number you write must appear in the facts (you may round to whole numbers). "
                "Do not compute new percentages or totals. Use ₹ for rupees. The 'recommendation' is a proposal that is "
                "NOT yet implemented: describe it as recommended/planned. Do not claim any facility (solar, sensors, "
-               "composting) exists unless it is in the facts; CampusPulse monitoring, work orders and photo reporting do exist.")
+               "composting) exists unless it is in the facts; CampusPulse monitoring, work orders and photo reporting do exist. "
+               "Glossary: 'waste_kwh', 'waste_inr', 'waste_share_pct', 'waste_events' and 'top_waste_rooms' mean ELECTRICITY "
+               "used in unoccupied rooms (avoidable energy use), not solid waste and not waste-to-energy. The 'waste' "
+               "section is about solid-waste bins. There is no waste-to-energy plant.")
         try:
             out = await llm.chat_json([{"role": "system", "content": sys},
                                        {"role": "user", "content": json.dumps(facts, default=str)}], max_tokens=3000)

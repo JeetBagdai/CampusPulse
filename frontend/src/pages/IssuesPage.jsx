@@ -19,7 +19,7 @@ export default function IssuesPage() {
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <h1 className="text-xl font-semibold mr-2">Work orders</h1>
         {['all', ...Object.keys(TYPE_META)].map((t) => (
-          <button key={t} onClick={() => setType(t)} className={`chip !py-1 ${type === t ? '!bg-emerald-500/25 !text-emerald-200' : ''}`}>
+          <button key={t} onClick={() => setType(t)} className={`chip !py-1 ${type === t ? '!bg-blue-500/25 !text-blue-200' : ''}`}>
             {t === 'all' ? 'All' : <><TypeIcon type={t} size={12} />{TYPE_META[t].label}</>}
           </button>
         ))}

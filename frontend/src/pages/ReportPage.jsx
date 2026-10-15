@@ -26,7 +26,7 @@ function Status({ ticket }) {
       {s.accepted === false ? <div className="text-amber-300 mt-3">Not raised: we couldn't confirm a problem in this photo.</div> : (
         <ol className="mt-4 space-y-2">
           {STEPS.map((k, i) => (
-            <li key={k} className={`flex items-center gap-2 ${i <= idx ? 'text-emerald-300' : 'text-slate-500'}`}>
+            <li key={k} className={`flex items-center gap-2 ${i <= idx ? 'text-blue-300' : 'text-slate-500'}`}>
               {i <= idx ? <CheckCircle2 size={18} /> : <span className="w-[18px] h-[18px] rounded-full border border-slate-600" />}
               {STEP_LABEL[k]}{i === idx && s.issue?.wo ? <span className="chip ml-1">{s.issue.wo}</span> : null}
             </li>
@@ -96,7 +96,7 @@ export default function ReportPage() {
           </div>
           <label className="glass p-4 flex flex-col items-center justify-center gap-2 cursor-pointer min-h-[200px]">
             {preview ? <img src={preview} alt="" className="rounded-xl max-h-72 object-contain" /> : (
-              <><Camera size={36} className="text-emerald-300" /><div className="font-semibold">Take a photo</div>
+              <><Camera size={36} className="text-blue-300" /><div className="font-semibold">Take a photo</div>
                 <div className="text-xs text-slate-400 text-center">Leaking tap, overflowing bin, litter, or lights left on in an empty room</div></>
             )}
             <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
