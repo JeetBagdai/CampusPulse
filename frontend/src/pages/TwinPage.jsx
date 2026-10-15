@@ -179,26 +179,6 @@ function Overview() {
   )
 }
 
-function KpiCard() {
-  const k = useStore((s) => s.snap.kpis)
-  const items = [
-    ['Wasted', inr(k.wasted_inr_today), 'text-rose-300'],
-    ['Open', k.open_issues, k.open_issues ? 'text-amber-300' : 'text-slate-100'],
-    ['Saved', inr(k.saved_inr), 'text-emerald-300'],
-    ['Score', `${k.score}`, scoreTone(k.score)],
-  ]
-  return (
-    <div className="absolute left-3 top-[76px] md:left-4 md:top-[96px] glass grid grid-cols-4 divide-x divide-white/10 pointer-events-none max-md:right-3">
-      {items.map(([l, v, tone]) => (
-        <div key={l} className="px-2.5 py-2 md:px-4 md:py-2.5 min-w-0">
-          <div className="text-[9px] md:text-[10px] uppercase tracking-wider text-slate-400 truncate">{l}</div>
-          <div className={`text-base md:text-xl font-extrabold tabular-nums leading-tight ${tone}`}>{v}</div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 // A card slides in for each newly detected issue; clicking it flies the camera there.
 const TOAST_MS = 7000
 function AlertToasts() {
@@ -227,7 +207,7 @@ function AlertToasts() {
   if (tourOn || !toasts.length) return null
   const dismiss = (id) => setToasts((ts) => ts.filter((x) => x.id !== id))
   return (
-    <div className="absolute z-20 flex flex-col gap-2 left-3 right-3 top-[140px] md:top-auto md:left-1/2 md:right-auto md:-translate-x-1/2 md:bottom-6 md:w-[420px]">
+    <div className="absolute z-20 flex flex-col gap-2 left-3 right-3 top-[80px] md:top-auto md:left-1/2 md:right-auto md:-translate-x-1/2 md:bottom-6 md:w-[420px]">
       {toasts.map(({ id }) => {
         const i = issues.find((x) => x.id === id)
         if (!i) return null
@@ -259,7 +239,7 @@ function AllClear() {
   const open = useStore((s) => s.snap.kpis.open_issues)
   if (open) return null
   return (
-    <div className="absolute z-10 left-1/2 -translate-x-1/2 top-[140px] md:top-[96px] glass-strong !rounded-full px-4 py-2 flex items-center gap-2 text-sm whitespace-nowrap pointer-events-none pop">
+    <div className="absolute z-10 left-1/2 -translate-x-1/2 top-[80px] md:top-[96px] glass-strong !rounded-full px-4 py-2 flex items-center gap-2 text-sm whitespace-nowrap pointer-events-none pop">
       <CheckCircle2 size={16} className="text-emerald-300" />
       <span className="font-semibold">All clear</span>
       <span className="text-slate-400 max-sm:hidden">· the campus is running clean</span>
@@ -288,7 +268,6 @@ export default function TwinPage() {
   return (
     <div className="h-full relative min-h-[520px]">
       <Twin3D />
-      <KpiCard />
       <AllClear />
       <AlertToasts />
       <Legend />

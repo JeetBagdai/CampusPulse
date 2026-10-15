@@ -2,12 +2,14 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { ArrowRight, Box, Camera, ClipboardList, FileText, FlaskConical, Loader2 } from 'lucide-react'
 import { useStore } from './store'
+import { inr } from './api'
 import TelegramIcon from './components/TelegramIcon'
 import PhonePanel from './components/PhonePanel'
 import CopilotDrawer from './components/CopilotDrawer'
 import DemoPanel from './components/DemoPanel'
 import Tour from './components/Tour'
 import Welcome from './components/Welcome'
+import Intro from './components/Intro'
 
 // pages load on demand: the 3D twin (three.js) and charts don't block the first paint of other pages
 const TwinPage = lazy(() => import('./pages/TwinPage'))
@@ -23,6 +25,29 @@ const NAV = [
   { to: '/whatif', label: 'Projection', icon: FlaskConical },
   { to: '/reports', label: 'Report', icon: FileText },
 ]
+
+// live campus numbers, shown in the middle of the nav bar
+function NavStats() {
+  const k = useStore((s) => s.snap?.kpis)
+  if (!k) return null
+  const scoreTone = k.score >= 85 ? 'text-emerald-300' : k.score >= 70 ? 'text-amber-300' : 'text-rose-300'
+  const items = [
+    ['Wasted', inr(k.wasted_inr_today), 'text-rose-300'],
+    ['Open', k.open_issues, k.open_issues ? 'text-amber-300' : 'text-neutral-100'],
+    ['Saved', inr(k.saved_inr), 'text-emerald-300'],
+    ['Score', k.score, scoreTone],
+  ]
+  return (
+    <div className="flex lg:absolute lg:left-1/2 lg:-translate-x-1/2 md:max-lg:hidden items-center divide-x divide-white/10 min-w-0">
+      {items.map(([label, value, tone]) => (
+        <div key={label} className="px-2 sm:px-3 lg:px-4 leading-tight min-w-0 first:pl-1 lg:first:pl-4">
+          <div className="text-[9px] lg:text-[10px] uppercase tracking-wider text-neutral-500">{label}</div>
+          <div className={`text-sm lg:text-base font-extrabold tabular-nums ${tone}`}>{value}</div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const Loading = () => (
   <div className="h-full flex items-center justify-center text-slate-400 gap-2"><Loader2 size={18} className="animate-spin" /> Loading…</div>
@@ -62,10 +87,11 @@ export default function App() {
             </NavLink>
           ))}
         </nav>
+        <NavStats />
         <div className="ml-auto flex items-center gap-3 shrink-0">
           <button onClick={startTour} title="Play the 2-minute guided demo"
-            className="flex items-center gap-2.5 rounded-[14px] bg-[#333333] hover:bg-[#404040] border border-white/10 text-neutral-100 font-semibold text-sm pl-4 pr-1.5 py-1.5 md:py-2 transition">
-            <span>Play demo</span>
+            className="flex items-center gap-2.5 rounded-[14px] bg-[#333333] hover:bg-[#404040] border border-white/10 text-neutral-100 font-semibold text-sm pl-1.5 sm:pl-4 pr-1.5 py-1.5 md:py-2 transition">
+            <span className="max-sm:sr-only">Play demo</span>
             <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center"><ArrowRight size={15} /></span>
           </button>
         </div>
@@ -117,6 +143,7 @@ export default function App() {
       <DemoPanel />
       {ready && <Welcome />}
       {ready && <Tour />}
+      <Intro />
     </div>
   )
 }
