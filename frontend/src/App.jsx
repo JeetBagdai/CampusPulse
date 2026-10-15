@@ -121,18 +121,18 @@ export default function App() {
         ))}
       </nav>
 
-      {/* floating camera button (next to Telegram): opens the computer-vision page */}
+      {/* floating camera button (bottom right): opens the computer-vision page */}
       {ready && (
         <NavLink to="/cameras" title="Cameras" aria-label="Cameras"
-          className={({ isActive }) => `no-print fixed z-40 right-[82px] bottom-[84px] md:bottom-5 w-[54px] h-[54px] rounded-full flex items-center justify-center
+          className={({ isActive }) => `no-print fixed z-40 right-4 bottom-[84px] md:bottom-5 w-[54px] h-[54px] rounded-full flex items-center justify-center
             bg-neutral-50 text-neutral-900 shadow-[0_10px_30px_rgba(0,0,0,0.45)] transition hover:scale-105 active:scale-95 ${isActive ? 'ring-2 ring-[#6ea0f5]' : ''}`}>
           <Camera size={22} />
         </NavLink>
       )}
-      {/* floating Telegram button: opens the staff messages drawer */}
+      {/* floating Telegram button (bottom left): opens the staff messages drawer on the left */}
       {ready && (
         <button onClick={togglePhone} title="Staff messages (Telegram)" aria-label="Staff messages"
-          className={`no-print fixed z-40 right-4 bottom-[84px] md:bottom-5 rounded-full shadow-[0_10px_30px_rgba(34,158,217,0.45)]
+          className={`no-print fixed z-40 left-4 bottom-[84px] md:bottom-5 rounded-full shadow-[0_10px_30px_rgba(34,158,217,0.45)]
             transition hover:scale-105 active:scale-95 ${phoneOpen ? 'ring-2 ring-white/70' : ''}`}>
           <TelegramIcon size={54} />
           {unread && <span className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full bg-rose-400 border-2 border-[#1d1d1d]" />}

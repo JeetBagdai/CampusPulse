@@ -27,7 +27,7 @@ export default function DemoPanel() {
   )
 
   return (
-    <div className="no-print fixed inset-x-2 bottom-[76px] md:inset-x-auto md:left-4 md:bottom-4 md:w-[460px] max-h-[80vh] overflow-auto glass-strong p-4 shadow-2xl z-50 pop">
+    <div className="no-print fixed inset-x-2 bottom-[76px] md:inset-x-auto md:left-4 md:bottom-[88px] md:w-[460px] max-h-[80vh] overflow-auto glass-strong p-4 shadow-2xl z-50 pop">
       <div className="flex items-center mb-3">
         <div className="font-semibold">Try a scenario</div>
         <button className="btn !p-1.5 ml-auto" onClick={toggleDemo}><X size={16} /></button>

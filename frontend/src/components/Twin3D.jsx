@@ -296,11 +296,11 @@ export default function Twin3D() {
           {hoverLive && hoverRoom.type === 'washroom' && <div className="text-slate-300">{hoverLive.flow_lpm} L/min</div>}
         </div>
       )}
-      <button className="btn !py-1 !px-3 text-xs absolute left-[104px] bottom-4 max-md:top-[80px] max-md:bottom-auto max-md:left-auto max-md:right-3"
+      <button className="btn !py-1 !px-3 text-xs absolute left-[176px] bottom-4 max-md:top-[80px] max-md:bottom-auto max-md:left-auto max-md:right-3"
         onClick={() => controls.current?.reset()}>
         <LocateFixed size={13} /> <span className="hidden md:inline">Reset view</span>
       </button>
-      <div className="absolute left-[220px] bottom-5 text-[10px] text-slate-500 pointer-events-none hidden md:block">
+      <div className="absolute left-[292px] bottom-5 text-[10px] text-slate-500 pointer-events-none hidden md:block">
         {campus.short_name} · building outlines © OpenStreetMap contributors · sensor data simulated
       </div>
     </div>

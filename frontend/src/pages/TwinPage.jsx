@@ -250,7 +250,7 @@ function AllClear() {
 function Legend() {
   const [open, setOpen] = useState(false)
   return (
-    <div className="absolute left-4 bottom-4 max-md:hidden">
+    <div className="absolute left-[86px] bottom-4 max-md:hidden">
       {open && (
         <div className="glass px-3 py-2 mb-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs pop">
           {LEGEND.map(([k, label]) => (
