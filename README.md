@@ -1,8 +1,50 @@
 # CampusPulse: continuous green audit for college campuses
 
-**Code Clash 2.0 · PS2: AI-Powered Sustainable Campus**
+**Code Clash 2.0 · PS2: AI-Powered Sustainable Campus** (computer vision + digital twin + generative AI)
 
 Every Indian college does its green audit (NAAC Criterion 7) once a year, by hand. CampusPulse does it continuously, on a live digital twin of **Dayananda Sagar University, Harohalli**. Computer vision and sensors catch energy waste, water leaks, overflowing bins and underused bookings. Each issue is priced in ₹ and CO₂, sent to the right staff member's phone in their language, verified when fixed, and rolled into a NAAC-ready report.
+
+![Live digital twin of DSU Harohalli](docs/screenshots/twin.png)
+
+## Try it in 2 minutes
+
+1. **Open the live app:** https://campuspulse-jb26.onrender.com
+   (free hosting: the first load after a quiet spell can take ~30 s while the server wakes up)
+2. Click **Play the 2-minute demo**. It runs by itself: lights are left on in a classroom, CampusPulse detects and prices the waste, writes a work order, the staff member taps Done, the twin verifies the fix, then it tours a leak, work orders, cameras, the what-if simulator and the NAAC report.
+3. **Optional, to see the staff side on your own phone:** open [t.me/campuspulse_bot?start=judge](https://t.me/campuspulse_bot?start=judge) in Telegram and tap Start before playing the demo. You will receive a copy of each work order and can tap **Done** yourself.
+4. **Try the computer vision:** open **Cameras** and click a sample bin photo (or upload your own). An overflowing bin raises a real issue on the twin. With a webcam, start the live camera: it counts people and checks whether lights are on.
+5. **Explore:** click any building or room, use the sliders icon in the top bar to trigger a scenario, or ask the campus a question with **Ask campus**.
+
+Everyone viewing the demo shares one simulated campus, so you may see issues others triggered.
+
+## Results
+
+| | |
+|---|---|
+| Bin fill-level model (YOLO11n, fine-tuned) | **90% of held-out photos correct** (36/40), **mAP50 0.898**, overflow recall 0.85 |
+| CV inference on CPU (ONNX Runtime) | ~50–60 ms per frame, no GPU |
+| What-if, default policy set on the simulated campus | about **₹35,800 / month** saved, payback ~7 months |
+| Languages for staff work orders | English, हिन्दी, ಕನ್ನಡ |
+
+<p>
+<img src="training/bin_confusion_matrix.png" width="49%" alt="Bin model confusion matrix" />
+<img src="training/training_curves.png" width="49%" alt="Training curves" />
+</p>
+
+Training and evaluation scripts are in [`training/`](training/) (`train_bin.py`, `eval_bin.py`, `bin_metrics.json`).
+
+## Screenshots
+
+| Work orders | What-if simulator |
+|---|---|
+| ![Work orders](docs/screenshots/workorders.png) | ![What-if](docs/screenshots/whatif.png) |
+| **NAAC green-audit report** | **Welcome screen** |
+| ![NAAC report](docs/screenshots/reports.png) | ![Welcome](docs/screenshots/welcome.png) |
+
+<p>
+<img src="docs/screenshots/mobile.png" width="30%" alt="Mobile twin" />
+<img src="docs/screenshots/report-mobile.png" width="30%" alt="Mobile report" />
+</p>
 
 ## What it does
 
@@ -50,7 +92,7 @@ npm install
 npm run dev                                           # http://localhost:5173
 ```
 
-Press **Ctrl+D** in the app for demo controls: inject scenarios, change speed, jump in time.
+Press **Ctrl+D** (or the sliders icon) to trigger scenarios and change simulation speed. On the hosted site, reset / time-jump endpoints need `ADMIN_KEY`.
 
 `CV_BACKEND` selects the vision runtime: `auto` (default: ONNX if `backend/models/*.onnx` exist, else PyTorch), `onnx` or `torch`.
 

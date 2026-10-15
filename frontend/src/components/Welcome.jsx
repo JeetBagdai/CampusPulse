@@ -24,7 +24,8 @@ export default function Welcome() {
   const bot = useStore((s) => s.snap?.bot?.username)
   const telegram = useStore((s) => s.snap?.channel === 'telegram')
 
-  useEffect(() => { if (!seen()) setWelcome(true) }, [setWelcome])
+  // ?skipintro hides the welcome (screenshots, embeds)
+  useEffect(() => { if (!seen() && !new URLSearchParams(location.search).has('skipintro')) setWelcome(true) }, [setWelcome])
   if (!welcomeOpen) return null
   const close = () => { markSeen(); setWelcome(false) }
   const judgeLink = bot ? `https://t.me/${bot}?start=judge` : null
