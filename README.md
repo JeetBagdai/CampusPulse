@@ -121,4 +121,4 @@ cd backend && python -m pytest -q
 | Jeet Bagdai | [@JeetBagdai](https://github.com/JeetBagdai) | _role_ |
 | Sohan Vinod | [@Sohan258oss](https://github.com/Sohan258oss) | _role_ |
 | Chiranth Yadalam | [@ChiranthYadalam](https://github.com/ChiranthYadalam) | _role_ |
-| _name_ | [@agkkk](https://github.com/agkkk) | _role_ |
+| Ananth | [@agkkk](https://github.com/agkkk) | _role_ |
