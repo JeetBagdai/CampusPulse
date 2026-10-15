@@ -9,7 +9,7 @@ import { TypeIcon } from './Icons'
 const ALERT = new Set(['energy', 'water', 'underused', 'litter', 'waste'])
 const FLAT = [-Math.PI / 2, 0, 0]
 // Blender-style viewport palette
-const VP = { bg: '#393939', floor: '#3d3d3d', grid: '#4d4d4d', grid2: '#444444', axisX: '#c43c48', axisZ: '#7aa53a',
+const VP = { bg: '#393939', floor: '#3d3d3d', grid: '#4d4d4d', grid2: '#444444',
   solid: '#9a9a9a', solidEdge: '#2b2b2b', shell: '#b5b5b5', road: '#5e5e5e', path: '#525252', select: '#ffa033' }
 
 // footprint [[x, z], ...] -> Shape in the x/-z plane (extruded upwards after rotating by FLAT)
@@ -171,9 +171,6 @@ export default function Twin3D() {
           <meshBasicMaterial color={VP.floor} />
         </mesh>
         <gridHelper args={[1500, 75, VP.grid, VP.grid2]} position={[0, 0.02, 0]} />
-        {/* X (red) and Z (green) axis lines through the origin, as in Blender */}
-        <Line points={[[-750, 0.1, 0], [750, 0.1, 0]]} color={VP.axisX} lineWidth={1.5} />
-        <Line points={[[0, 0.1, -550], [0, 0.1, 550]]} color={VP.axisZ} lineWidth={1.5} />
         <StaticMap campus={campus} />
         {campus.rooms.map((r) => (
           <RoomBox key={r.id} room={r} status={snap.rooms[r.id]?.status || 'idle'} selected={selected === r.id}
