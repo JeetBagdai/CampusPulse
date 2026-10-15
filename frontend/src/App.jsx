@@ -32,8 +32,8 @@ function Clock() {
   const d = new Date(clock)
   return (
     <div className="text-right leading-tight hidden md:block">
-      <div className="font-mono text-sm font-semibold text-neutral-900">{d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
-      <div className="text-[10px] text-neutral-500">
+      <div className="font-mono text-sm font-semibold text-neutral-100">{d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+      <div className="text-[10px] text-neutral-400">
         {d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
         {paused ? ' · paused' : speed > 1 ? ` · ${speed}×` : ''}
       </div>
@@ -76,19 +76,19 @@ export default function App() {
           {NAV.map(({ to, label }) => (
             <NavLink key={to} to={to} end
               className={({ isActive }) => `px-3.5 py-2 rounded-full text-[15px] transition
-                ${isActive ? 'bg-neutral-900/[0.07] text-neutral-950 font-semibold' : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-900/[0.04]'}`}>
+                ${isActive ? 'bg-white/10 text-white font-semibold' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
               {label}
             </NavLink>
           ))}
         </nav>
         <NavLink to="/" className="flex items-center gap-2 shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2">
           <img src="/favicon.svg" className="w-7 h-7" alt="" />
-          <span className="font-extrabold tracking-tight text-[17px] text-neutral-950">CampusPulse</span>
-          {campus && <span className="hidden xl:inline text-[11px] font-semibold text-neutral-500 bg-neutral-900/[0.06] rounded-full px-2 py-0.5">{campus.short_name}</span>}
+          <span className="font-extrabold tracking-tight text-[17px] text-white">CampusPulse</span>
+          {campus && <span className="hidden xl:inline text-[11px] font-semibold text-neutral-400 bg-white/[0.07] rounded-full px-2 py-0.5">{campus.short_name}</span>}
         </NavLink>
         <div className="ml-auto flex items-center gap-3 shrink-0">
           <Clock />
-          <span className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-500' : 'bg-rose-500'}`} title={connected ? 'live' : 'offline'} />
+          <span className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400' : 'bg-rose-400'}`} title={connected ? 'live' : 'offline'} />
           <button onClick={startTour} title="Play the 2-minute guided demo"
             className="flex items-center gap-2.5 rounded-[14px] bg-[#4772b3] hover:bg-[#3f67a3] text-white font-semibold text-sm pl-4 pr-1.5 py-1.5 md:py-2 transition shadow-[0_6px_18px_rgba(71,114,179,0.35)]">
             <span>Play demo</span>
