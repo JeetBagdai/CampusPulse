@@ -165,12 +165,14 @@ export default function Twin3D() {
         <color attach="background" args={[VP.bg]} />
         <hemisphereLight args={['#ffffff', '#3a3a3a', 1.1]} />
         <directionalLight position={[300, 500, 200]} intensity={1.4} />
-        <OrbitControls ref={controls} target={target} maxPolarAngle={Math.PI / 2.15} minDistance={40} maxDistance={1600} makeDefault />
+        <OrbitControls ref={controls} target={target} maxPolarAngle={Math.PI / 2.15} minDistance={40} maxDistance={2600} makeDefault />
         <mesh rotation={FLAT} position={[0, -0.05, 0]}>
           <planeGeometry args={[8000, 8000]} />
           <meshBasicMaterial color={VP.floor} />
         </mesh>
-        <gridHelper args={[1500, 75, VP.grid, VP.grid2]} position={[0, 0.02, 0]} />
+        <gridHelper args={[8000, 400, VP.grid, VP.grid2]} position={[0, 0.02, 0]} />
+        {/* the grid runs to the horizon and fades into the background */}
+        <fog attach="fog" args={[VP.bg, 1400, 4200]} />
         <StaticMap campus={campus} />
         {campus.rooms.map((r) => (
           <RoomBox key={r.id} room={r} status={snap.rooms[r.id]?.status || 'idle'} selected={selected === r.id}

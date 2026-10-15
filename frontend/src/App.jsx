@@ -24,23 +24,6 @@ const NAV = [
   { to: '/reports', label: 'Report', icon: FileText },
 ]
 
-function Clock() {
-  const clock = useStore((s) => s.snap?.clock)
-  const speed = useStore((s) => s.snap?.speed)
-  const paused = useStore((s) => s.snap?.paused)
-  if (!clock) return null
-  const d = new Date(clock)
-  return (
-    <div className="text-right leading-tight hidden md:block">
-      <div className="font-mono text-sm font-semibold text-neutral-100">{d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
-      <div className="text-[10px] text-neutral-400">
-        {d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
-        {paused ? ' · paused' : speed > 1 ? ` · ${speed}×` : ''}
-      </div>
-    </div>
-  )
-}
-
 const Loading = () => (
   <div className="h-full flex items-center justify-center text-slate-400 gap-2"><Loader2 size={18} className="animate-spin" /> Loading…</div>
 )
@@ -49,7 +32,6 @@ export default function App() {
   const init = useStore((s) => s.init)
   const ready = useStore((s) => !!s.snap)
   const campus = useStore((s) => s.campus)
-  const connected = useStore((s) => s.connected)
   const lastId = useStore((s) => s.snap?.feed?.at(-1)?.id ?? 0)
   const { toggleDemo, togglePhone, phoneOpen, startTour } = useStore()
   const onTwin = useLocation().pathname === '/'
@@ -87,8 +69,6 @@ export default function App() {
           {campus && <span className="hidden xl:inline text-[11px] font-semibold text-neutral-400 bg-white/[0.07] rounded-full px-2 py-0.5">{campus.short_name}</span>}
         </NavLink>
         <div className="ml-auto flex items-center gap-3 shrink-0">
-          <Clock />
-          <span className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-400' : 'bg-rose-400'}`} title={connected ? 'live' : 'offline'} />
           <button onClick={startTour} title="Play the 2-minute guided demo"
             className="flex items-center gap-2.5 rounded-[14px] bg-[#4772b3] hover:bg-[#3f67a3] text-white font-semibold text-sm pl-4 pr-1.5 py-1.5 md:py-2 transition shadow-[0_6px_18px_rgba(71,114,179,0.35)]">
             <span>Play demo</span>
