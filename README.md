@@ -13,7 +13,7 @@ Every Indian college does its green audit (NAAC Criterion 7) once a year, by han
 2. Click **Play the 2-minute demo**. It runs by itself: lights are left on in a classroom, CampusPulse detects and prices the waste, writes a work order, the staff member taps Done, the twin verifies the fix, then it tours a leak, work orders, cameras, the what-if simulator and the NAAC report.
 3. **Optional, to see the staff side on your own phone:** open [t.me/campuspulse_bot?start=judge](https://t.me/campuspulse_bot?start=judge) in Telegram and tap Start before playing the demo. You will receive a copy of each work order and can tap **Done** yourself.
 4. **Try the computer vision:** open **Cameras** and click a sample bin photo (or upload your own). An overflowing bin raises a real issue on the twin. With a webcam, start the live camera: it counts people and checks whether lights are on.
-5. **Explore:** click any building or room, use the sliders icon in the top bar to trigger a scenario, or ask the campus a question with **Ask campus**.
+5. **Explore:** click any room or bin for its live readings and QR code, open the staff messages with the Telegram button, or press **Ctrl+D** to trigger a scenario.
 
 Everyone viewing the demo shares one simulated campus, so you may see issues others triggered.
 
@@ -92,7 +92,7 @@ npm install
 npm run dev                                           # http://localhost:5173
 ```
 
-Press **Ctrl+D** (or the sliders icon) to trigger scenarios and change simulation speed. On the hosted site, reset / time-jump endpoints need `ADMIN_KEY`.
+Press **Ctrl+D** to trigger scenarios and change simulation speed. On the hosted site, reset / time-jump endpoints need `ADMIN_KEY`.
 
 `CV_BACKEND` selects the vision runtime: `auto` (default: ONNX if `backend/models/*.onnx` exist, else PyTorch), `onnx` or `torch`.
 

@@ -130,7 +130,7 @@ function buildSteps(campus) {
     },
     {
       title: "That's CampusPulse",
-      text: () => 'Explore on your own: click any room on the twin, ask the campus a question, or try another scenario.',
+      text: () => 'Explore on your own: click any room on the twin, open the staff messages with the Telegram button, or ask the AI to explain a work order.',
       run: async ({ nav }) => nav('/'),
       dwell: null, // last step waits for the user
     },

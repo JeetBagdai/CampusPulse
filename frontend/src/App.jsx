@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Box, Camera, ClipboardList, FileText, FlaskConical, Loader2, PlayCircle, Sparkles, SlidersHorizontal } from 'lucide-react'
+import { Box, Camera, ClipboardList, FileText, FlaskConical, Loader2, PlayCircle } from 'lucide-react'
 import { useStore } from './store'
 import TelegramIcon from './components/TelegramIcon'
 import PhonePanel from './components/PhonePanel'
@@ -51,7 +51,7 @@ export default function App() {
   const campus = useStore((s) => s.campus)
   const connected = useStore((s) => s.connected)
   const lastId = useStore((s) => s.snap?.feed?.at(-1)?.id ?? 0)
-  const { openCopilot, toggleDemo, togglePhone, phoneOpen, startTour } = useStore()
+  const { toggleDemo, togglePhone, phoneOpen, startTour } = useStore()
   const seen = useRef(0)
   const [unread, setUnread] = useState(false)
 
@@ -89,10 +89,6 @@ export default function App() {
             title={connected ? 'live' : 'offline'} />
           <button className="btn !px-2.5 md:!px-3" onClick={startTour} title="Play the 2-minute guided demo">
             <PlayCircle size={16} /><span className="hidden lg:inline">Play demo</span>
-          </button>
-          <button className="btn !px-2.5" onClick={toggleDemo} title="Try a scenario (Ctrl+D)"><SlidersHorizontal size={16} /></button>
-          <button className="btn btn-primary !px-2.5 md:!px-3.5" onClick={() => openCopilot()}>
-            <Sparkles size={16} /><span className="hidden sm:inline">Ask campus</span>
           </button>
         </div>
       </header>

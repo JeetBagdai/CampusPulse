@@ -24,8 +24,13 @@ def _simulate(auto_off: int | None, led: bool, fix_leaks: bool, consolidate: boo
     pol = Policy(auto_off_minutes=auto_off, led_retrofit=led, leak_cap_hours=1.0 if fix_leaks else None,
                  release_no_shows=consolidate, extra_pickup=pickup)
     s = MockSource(load_campus(), START, seed=SEED, policy=pol, record_history=False)
-    s.fast_forward(START + timedelta(days=days), step_minutes=10)
-    return _metrics(s)
+    daily, prev = [], 0
+    for d in range(1, days + 1):  # step a day at a time to record the daily bill
+        s.fast_forward(START + timedelta(days=d), step_minutes=10)
+        bill = _metrics(s)["bill_inr"]
+        daily.append(bill - prev)
+        prev = bill
+    return {**_metrics(s), "daily_bill_inr": daily}
 
 
 def run(policy: dict, days: int = 30) -> dict:
@@ -49,11 +54,15 @@ def run(policy: dict, days: int = 30) -> dict:
     opex_month = cfg.CAPEX["extra_pickup_per_day"] * 30 if pickup else 0
 
     scale = 30 / days
+    series = [{"date": (START + timedelta(days=i)).strftime("%d %b"), "today": b, "policy": n}
+              for i, (b, n) in enumerate(zip(base["daily_bill_inr"], new["daily_bill_inr"]))]
+    base = {k: v for k, v in base.items() if k != "daily_bill_inr"}
+    new = {k: v for k, v in new.items() if k != "daily_bill_inr"}
     delta = {k: round((base[k] - new[k]) * scale, 1) for k in base}
     monthly = round(delta["bill_inr"] - opex_month)
     total_capex = sum(capex.values())
     payback = round(total_capex / monthly, 1) if monthly > 0 and total_capex else (0 if total_capex == 0 else None)
-    return {"days": days, "baseline": base, "policy": new, "delta_per_month": delta,
+    return {"days": days, "baseline": base, "policy": new, "delta_per_month": delta, "daily": series,
             "monthly_saving_inr": monthly, "annual_saving_inr": monthly * 12, "capex": capex,
             "capex_total_inr": total_capex, "opex_month_inr": opex_month, "payback_months": payback,
             "assumptions": {"tariff_inr_per_kwh": cfg.TARIFF_INR_PER_KWH, "water_inr_per_kl": cfg.WATER_INR_PER_KL,
