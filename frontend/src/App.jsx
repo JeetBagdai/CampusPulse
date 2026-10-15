@@ -31,7 +31,6 @@ const Loading = () => (
 export default function App() {
   const init = useStore((s) => s.init)
   const ready = useStore((s) => !!s.snap)
-  const campus = useStore((s) => s.campus)
   const lastId = useStore((s) => s.snap?.feed?.at(-1)?.id ?? 0)
   const { toggleDemo, togglePhone, phoneOpen, startTour } = useStore()
   const onTwin = useLocation().pathname === '/'
@@ -51,7 +50,7 @@ export default function App() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* floating pill nav: links left, logo centred, demo button right */}
+      {/* floating pill nav: links left, demo button right */}
       <header className="no-print navpill fixed z-30 top-3 inset-x-3 md:top-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[min(1120px,calc(100%-32px))]
         h-14 md:h-16 flex items-center gap-3 px-3 md:px-4">
         <nav className="hidden md:flex items-center gap-0.5">
@@ -63,16 +62,11 @@ export default function App() {
             </NavLink>
           ))}
         </nav>
-        <NavLink to="/" className="flex items-center gap-2 shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2">
-          <img src="/favicon.svg" className="w-7 h-7" alt="" />
-          <span className="font-extrabold tracking-tight text-[17px] text-white">CampusPulse</span>
-          {campus && <span className="hidden xl:inline text-[11px] font-semibold text-neutral-400 bg-white/[0.07] rounded-full px-2 py-0.5">{campus.short_name}</span>}
-        </NavLink>
         <div className="ml-auto flex items-center gap-3 shrink-0">
           <button onClick={startTour} title="Play the 2-minute guided demo"
-            className="flex items-center gap-2.5 rounded-[14px] bg-[#4772b3] hover:bg-[#3f67a3] text-white font-semibold text-sm pl-4 pr-1.5 py-1.5 md:py-2 transition shadow-[0_6px_18px_rgba(71,114,179,0.35)]">
+            className="flex items-center gap-2.5 rounded-[14px] bg-[#333333] hover:bg-[#404040] border border-white/10 text-neutral-100 font-semibold text-sm pl-4 pr-1.5 py-1.5 md:py-2 transition">
             <span>Play demo</span>
-            <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowRight size={15} /></span>
+            <span className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center"><ArrowRight size={15} /></span>
           </button>
         </div>
       </header>
