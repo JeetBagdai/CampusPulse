@@ -41,6 +41,7 @@ class TelegramBot(Notifier):
             data = {"roles": data, "langs": {}}
         self.chats: dict[str, int] = data["roles"]
         self.langs: dict[str, str] = data["langs"]  # chat_id (str) -> en|hi|kn
+        self.observers: list[int] = data.get("observers", [])  # judges watching demo work orders
         self.username = None
 
     def configured(self) -> bool:
@@ -61,7 +62,7 @@ class TelegramBot(Notifier):
         return self.langs.get(str(chat)) if chat else None
 
     def _save(self):
-        CHATS_FILE.write_text(json.dumps({"roles": self.chats, "langs": self.langs}, indent=1))
+        CHATS_FILE.write_text(json.dumps({"roles": self.chats, "langs": self.langs, "observers": self.observers}, indent=1))
 
     async def send(self, phone, text, buttons=None):
         if not phone.startswith("tg:"):
@@ -116,6 +117,16 @@ class TelegramBot(Notifier):
         if text.startswith("/start"):
             arg = text.split(maxsplit=1)[1].strip().lower() if " " in text else ""
             arg = ALIASES.get(arg, arg)
+            if arg == "judge":
+                if chat_id not in self.observers:
+                    self.observers.append(chat_id)
+                    self._save()
+                await self._reply(chat_id, "You are now watching CampusPulse as a judge. Every demo work order sent to "
+                                           "campus staff will also arrive here, and you can tap Done to close it. "
+                                           "Try it: open the website, press Play demo, or trigger a scenario.\n\n"
+                                           "Students can also send a photo here with the caption REPORT <location>, "
+                                           "for example REPORT E-1WR.")
+                return
             picked = list(ROLES) if arg == "all" else [arg] if arg in ROLES else []
             if picked:
                 for r in picked:

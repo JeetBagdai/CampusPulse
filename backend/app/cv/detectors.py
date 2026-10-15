@@ -92,30 +92,36 @@ def detect_people(img: np.ndarray) -> list[list[float]]:
         return [[x, y, x + w, y + h, float(wt)] for (x, y, w, h), wt in zip(rects, np.ravel(weights)) if wt > 0.5]
 
 
-def detect_bin(img: np.ndarray) -> tuple[str | None, float]:
-    """('empty'|'half'|'full'|'overflow', conf) from the trained bin model, or (None, 0) if no model."""
+def detect_bin_box(img: np.ndarray) -> tuple[str | None, float, list[float] | None]:
+    """Most confident bin: ('empty'|'half'|'full'|'overflow', conf, [x1, y1, x2, y2]) or (None, 0, None)."""
     loaded = bin_model()
     if loaded is None:
-        return None, 0.0
+        return None, 0.0, None
     kind, model = loaded
-    best, conf = None, 0.0
+    best, conf, box = None, 0.0, None
     with _lock:
         if kind == "onnx":
-            for *_, c, k in model(img, conf=0.35):
+            for x1, y1, x2, y2, c, k in model(img, conf=0.35):
                 if c > conf:
-                    best, conf = model.names[k].lower(), c
+                    best, conf, box = model.names[k].lower(), c, [x1, y1, x2, y2]
         else:
             res = model(img, conf=0.35, verbose=False)[0]
             for b in res.boxes:
                 n, c = res.names[int(b.cls[0])].lower(), float(b.conf[0])
                 if c > conf:
-                    best, conf = n, c
+                    best, conf, box = n, c, b.xyxy[0].tolist()
     if best is None:
-        return None, 0.0
+        return None, 0.0, None
     for key, label in (("over", "overflow"), ("full", "full"), ("empty", "empty"), ("half", "half")):
         if key in best:
-            return label, conf
-    return best, conf
+            return label, conf, box
+    return best, conf, box
+
+
+def detect_bin(img: np.ndarray) -> tuple[str | None, float]:
+    """('empty'|'half'|'full'|'overflow', conf) from the trained bin model, or (None, 0) if no model."""
+    label, conf, _ = detect_bin_box(img)
+    return label, conf
 
 
 def blur_faces(img: np.ndarray, persons: list[list[float]]) -> np.ndarray:
@@ -200,17 +206,22 @@ def analyse(state: CameraState, jpeg: bytes, want_bin: bool = False) -> dict:
             motion[name] = round(sum(state.motion[name]) / len(state.motion[name]), 2)
     state.prev = gray
 
-    bin_state, bin_conf = detect_bin(img) if want_bin else (None, 0.0)
+    bin_state, bin_conf, bin_box = detect_bin_box(img) if want_bin else (None, 0.0, None)
 
     shown = blur_faces(img, persons)
     for x1, y1, x2, y2, conf in persons:
         cv2.rectangle(shown, (int(x1), int(y1)), (int(x2), int(y2)), (80, 220, 120), 2)
         cv2.putText(shown, f"person {conf:.2f}", (int(x1), max(12, int(y1) - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     (80, 220, 120), 1)
-    for name, roi in state.rois.items():
+    for name, roi in ({} if want_bin else state.rois).items():  # fan/tap guides only when watching a room
         a, b, c, d = _roi(img.shape, roi)
         cv2.rectangle(shown, (a, b), (c, d), (255, 180, 60), 1)
         cv2.putText(shown, f"{name} roi", (a + 3, b + 14), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 180, 60), 1)
+    if bin_box:
+        colour = {"overflow": (113, 113, 251), "full": (36, 191, 251), "half": (36, 191, 251)}.get(bin_state, (153, 211, 52))
+        x1, y1, x2, y2 = map(int, bin_box)
+        cv2.rectangle(shown, (x1, y1), (x2, y2), colour, 3)
+        cv2.putText(shown, f"{bin_state} {bin_conf:.2f}", (x1 + 4, max(18, y1 - 8)), cv2.FONT_HERSHEY_SIMPLEX, 0.7, colour, 2)
     ok, buf = cv2.imencode(".jpg", shown, [cv2.IMWRITE_JPEG_QUALITY, 70])
 
     return {

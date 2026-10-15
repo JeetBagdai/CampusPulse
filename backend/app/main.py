@@ -3,6 +3,8 @@ import asyncio
 import io
 import json
 import logging
+import os
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -43,6 +45,8 @@ async def sim_loop():
     while True:
         await asyncio.sleep(1)
         try:
+            if engine.speed > 1 and time.time() - getattr(engine, "speed_set_at", 0) > 120:
+                engine.speed = 1  # shared simulation: never leave it fast-forwarded for the next visitor
             if not engine.paused:
                 engine.tick(engine.speed)
             if clients:
@@ -154,28 +158,42 @@ def demo_inject(body: Inject):
     return {"ok": True}
 
 
+def require_admin(key: str | None):
+    """Global, destructive controls are team-only on the hosted site (set ADMIN_KEY to use them there)."""
+    hosted = bool(os.getenv("RENDER_EXTERNAL_URL"))
+    admin_key = os.getenv("ADMIN_KEY", "")
+    if hosted and (not admin_key or key != admin_key):
+        raise HTTPException(403, "This control is disabled on the public demo")
+
+
 @app.post("/api/demo/speed")
-def demo_speed(x: int = 1, paused: bool | None = None):
-    engine.speed = max(1, min(x, 120))
+def demo_speed(x: int = 1, paused: bool | None = None, key: str | None = None):
+    # anyone may speed up (max 15x, auto-returns to 1x after 2 min); pausing is team-only
+    engine.speed = max(1, min(x, 15))
+    engine.speed_set_at = time.time()
     if paused is not None:
+        require_admin(key)
         engine.paused = paused
     return {"speed": engine.speed, "paused": engine.paused}
 
 
 @app.post("/api/demo/jump")
-def demo_jump(hour: int):
+def demo_jump(hour: int, key: str | None = None):
+    require_admin(key)
     engine.jump(hour)
     return {"clock": engine.src.now().isoformat()}
 
 
 @app.post("/api/demo/reset")
-def demo_reset():
+def demo_reset(key: str | None = None):
+    require_admin(key)
     engine.reset()
     return {"ok": True}
 
 
 @app.post("/api/demo/wa-mode")
-def wa_mode(mode: str):
+def wa_mode(mode: str, key: str | None = None):
+    require_admin(key)
     if mode not in ("demo", "all", "off"):
         raise HTTPException(400, "mode must be demo | all | off")
     engine.wa_mode = mode

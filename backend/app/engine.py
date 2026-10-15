@@ -292,6 +292,13 @@ class Engine:
             channel, status = self.notifier.channel, ("delivered" if ok else f"failed: {detail}")
         self.feed.add("out", role, text, channel, status, phone=mask(phone), wo=wo,
                       buttons=[b[1] for b in buttons] if buttons else [])
+        # judges who opened t.me/<bot>?start=judge get a copy of every real (demo) staff message
+        observers = getattr(self.notifier, "observers", [])
+        if use_real and wo and role in self.staff and observers:
+            copy = f"[Copy of message to {self.staff[role]['name']}]\n\n{text}"
+            for chat in list(observers)[-20:]:
+                if f"tg:{chat}" != phone:
+                    await self.notifier.send(f"tg:{chat}", copy, buttons)
 
     def _spawn(self, coro):
         try:

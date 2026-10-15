@@ -33,6 +33,12 @@ export default function PhonePanel() {
           </div>
         </div>
       </div>
+      {snap.channel === 'telegram' && snap.bot?.username && (
+        <a href={`https://t.me/${snap.bot.username}?start=judge`} target="_blank" rel="noreferrer"
+          className="well px-2.5 py-1.5 mb-2 text-[11px] text-slate-300 hover:text-teal-100 block">
+          Get these work orders on your phone: <span className="text-teal-200 underline">t.me/{snap.bot.username}?start=judge</span>
+        </a>
+      )}
       <div className="flex gap-1 flex-wrap mb-2">
         {[...ROLES, ['all', 'All']].map(([k, l]) => (
           <button key={k} onClick={() => setRole(k)} className={`chip ${role === k ? '!bg-emerald-500/25 !text-emerald-200' : ''}`}>{l}</button>

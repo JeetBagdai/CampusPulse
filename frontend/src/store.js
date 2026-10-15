@@ -10,6 +10,8 @@ export const useStore = create((set, get) => ({
   copilotSeed: null,
   demoOpen: false,
   phoneOpen: false,
+  tourOn: false,
+  welcomeOpen: false,
 
   init: async () => {
     if (get().campus || get().initing) return
@@ -41,6 +43,10 @@ export const useStore = create((set, get) => ({
   closeCopilot: () => set({ copilotOpen: false, copilotSeed: null }),
   toggleDemo: () => set((s) => ({ demoOpen: !s.demoOpen })),
   togglePhone: () => set((s) => ({ phoneOpen: !s.phoneOpen })),
+  setPhone: (open) => set({ phoneOpen: open }),
+  startTour: () => set({ tourOn: true, welcomeOpen: false, demoOpen: false, copilotOpen: false }),
+  stopTour: () => set({ tourOn: false }),
+  setWelcome: (open) => set({ welcomeOpen: open }),
 }))
 
 export const STATUS_COLOR = {

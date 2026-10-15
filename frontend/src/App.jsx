@@ -1,10 +1,12 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Box, Camera, ClipboardList, FileText, FlaskConical, Loader2, MessageCircle, Sparkles, SlidersHorizontal } from 'lucide-react'
+import { Box, Camera, ClipboardList, FileText, FlaskConical, Loader2, MessageCircle, PlayCircle, Sparkles, SlidersHorizontal } from 'lucide-react'
 import { useStore } from './store'
 import PhonePanel from './components/PhonePanel'
 import CopilotDrawer from './components/CopilotDrawer'
 import DemoPanel from './components/DemoPanel'
+import Tour from './components/Tour'
+import Welcome from './components/Welcome'
 
 // pages load on demand: the 3D twin (three.js) and charts don't block the first paint of other pages
 const TwinPage = lazy(() => import('./pages/TwinPage'))
@@ -48,7 +50,7 @@ export default function App() {
   const campus = useStore((s) => s.campus)
   const connected = useStore((s) => s.connected)
   const lastId = useStore((s) => s.snap?.feed?.at(-1)?.id ?? 0)
-  const { openCopilot, toggleDemo, togglePhone, phoneOpen } = useStore()
+  const { openCopilot, toggleDemo, togglePhone, phoneOpen, startTour } = useStore()
   const seen = useRef(0)
   const [unread, setUnread] = useState(false)
 
@@ -84,7 +86,10 @@ export default function App() {
           <Clock />
           <span className={`w-2 h-2 rounded-full mx-1 ${connected ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-rose-400'}`}
             title={connected ? 'live' : 'offline'} />
-          <button className="btn !px-2.5" onClick={toggleDemo} title="Demo controls (Ctrl+D)"><SlidersHorizontal size={16} /></button>
+          <button className="btn !px-2.5 md:!px-3" onClick={startTour} title="Play the 2-minute guided demo">
+            <PlayCircle size={16} /><span className="hidden lg:inline">Play demo</span>
+          </button>
+          <button className="btn !px-2.5" onClick={toggleDemo} title="Try a scenario (Ctrl+D)"><SlidersHorizontal size={16} /></button>
           <button className={`btn !px-2.5 relative ${phoneOpen ? '!border-teal-300/50' : ''}`} onClick={togglePhone} title="Staff messages">
             <MessageCircle size={16} />
             {unread && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-teal-300 shadow-[0_0_8px_#5eead4]" />}
@@ -122,6 +127,8 @@ export default function App() {
       {phoneOpen && ready && <PhonePanel />}
       <CopilotDrawer />
       <DemoPanel />
+      {ready && <Welcome />}
+      {ready && <Tour />}
     </div>
   )
 }

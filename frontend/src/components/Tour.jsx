@@ -1,0 +1,209 @@
+// Self-running guided demo: triggers real events on the shared twin and walks through every page
+// with captions, so judges can see the full loop without a presenter.
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { ChevronRight, Pause, Play, RotateCcw, X } from 'lucide-react'
+import { api, inr } from '../api'
+import { useStore } from '../store'
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const snap = () => useStore.getState().snap
+const OPEN = (i) => !['verified', 'auto_closed', 'closed'].includes(i.status)
+
+async function waitFor(pred, timeout = 20000) {
+  const t0 = Date.now()
+  while (Date.now() - t0 < timeout) {
+    const v = pred(snap())
+    if (v) return v
+    await sleep(400)
+  }
+  return null
+}
+
+function buildSteps(campus) {
+  const room = campus.live_room
+  const roomName = campus.rooms.find((r) => r.id === room)?.name || room
+  const wash = campus.rooms.find((r) => r.type === 'washroom' && r.building === room.split('-')[0])?.id
+    || campus.rooms.find((r) => r.type === 'washroom').id
+  const ctx = {}
+  const energyIssue = (s) => s.issues.find((i) => i.target === room && i.type === 'ENERGY_WASTE' && (i.id === ctx.issue || OPEN(i)))
+
+  return [
+    {
+      title: 'A live digital twin of the campus',
+      text: () => `These are the real buildings of ${campus.short_name}. Sensors and cameras feed every room; colours show what's happening right now.`,
+      run: async ({ nav, select, phone }) => { nav('/'); select(null); phone(false) },
+      dwell: 6500,
+    },
+    {
+      title: 'Someone leaves the lights on',
+      text: () => `${roomName} (${room}) has just emptied, but its lights and fans are still running.`,
+      run: async ({ select }) => {
+        await api.post('/api/demo/inject', { scenario: 'lights_left_on', target: room })
+        select(room)
+      },
+      dwell: 4000,
+    },
+    {
+      title: 'Detected and priced',
+      text: (s) => {
+        const i = s && energyIssue(s)
+        return i ? `Within minutes it's flagged as energy waste costing ${inr(i.rate_inr_hr)} an hour, with a pin on the twin.`
+          : 'Within minutes it is flagged as energy waste and priced in rupees per hour.'
+      },
+      run: async () => {
+        const i = await waitFor(energyIssue, 25000)
+        if (i) ctx.issue = i.id
+      },
+      dwell: 5500,
+    },
+    {
+      title: 'An AI work order reaches the right person',
+      text: () => 'A work order is written by AI and sent to the Electrical In-charge on Telegram, in the language they chose (English, Hindi or Kannada).',
+      run: async ({ phone }) => {
+        phone(true)
+        const wo = (await waitFor((s) => s.issues.find((i) => i.id === ctx.issue)?.wo, 10000))
+        ctx.wo = wo
+        await waitFor((s) => s.feed.some((m) => m.dir === 'out' && m.wo === wo), 15000)
+      },
+      dwell: 7000,
+    },
+    {
+      title: 'Staff tap Done, the twin double-checks',
+      text: () => 'The staff member taps Done on their phone. CampusPulse only marks it fixed after the next camera or sensor reading confirms it.',
+      run: async () => {
+        if (ctx.wo) await api.post('/api/wa/simulate', { role: 'electrician', text: 'Done', button_id: `DONE:${ctx.wo}` })
+        await waitFor((s) => s.issues.find((i) => i.id === ctx.issue)?.status === 'verified', 15000)
+      },
+      dwell: 5000,
+    },
+    {
+      title: 'Verified fix, money saved',
+      text: (s) => {
+        const i = s?.issues.find((x) => x.id === ctx.issue)
+        return i?.saved_inr ? `Verified: ${inr(i.saved_inr)} saved and logged for the green audit.` : 'Verified, and the saving is logged for the green audit.'
+      },
+      run: async ({ phone }) => { phone(false) },
+      dwell: 5000,
+    },
+    {
+      title: 'A leak at night',
+      text: () => `A washroom water meter (${wash}) shows water flowing with nobody around. That pattern means a leak.`,
+      run: async ({ select }) => {
+        await api.post('/api/demo/inject', { scenario: 'leak', target: wash })
+        await api.post('/api/demo/speed?x=15')
+        select(wash)
+        await waitFor((s) => s.issues.some((i) => i.target === wash && i.type === 'WATER_LEAK' && OPEN(i)), 30000)
+        await api.post('/api/demo/speed?x=1')
+      },
+      dwell: 4500,
+    },
+    {
+      title: 'Students can report problems too',
+      text: () => 'Every location has a QR code. A student scans it and snaps a photo; computer vision and AI verify the photo before an issue is raised.',
+      run: async () => {},
+      dwell: 7000,
+    },
+    {
+      title: 'Every issue is tracked to the end',
+      text: () => 'Work orders move from dispatched to in progress, verifying and verified. Unanswered urgent ones escalate to the Estate Manager.',
+      run: async ({ nav, select }) => { select(null); nav('/issues') },
+      dwell: 6500,
+    },
+    {
+      title: 'Computer vision',
+      text: () => 'YOLO counts people and checks lights from an ordinary camera, with faces blurred. A custom-trained model sorts bins into empty, half and overflowing (90% accurate). Try a sample photo here.',
+      run: async ({ nav }) => nav('/cameras'),
+      dwell: 8000,
+    },
+    {
+      title: 'What would a policy save?',
+      text: () => 'The what-if engine replays 30 days of campus life with and without a policy, and shows the monthly saving, CO₂ avoided and payback.',
+      run: async ({ nav }) => nav('/whatif'),
+      dwell: 7500,
+    },
+    {
+      title: 'A green-audit report in one click',
+      text: () => 'A NAAC Criterion 7.1 report is written from live data. AI writes the words; every number comes from the engine and is checked.',
+      run: async ({ nav }) => nav('/reports'),
+      dwell: 7500,
+    },
+    {
+      title: "That's CampusPulse",
+      text: () => 'Explore on your own: click any room on the twin, ask the campus a question, or try another scenario.',
+      run: async ({ nav }) => nav('/'),
+      dwell: null, // last step waits for the user
+    },
+  ]
+}
+
+export default function Tour() {
+  const { tourOn, stopTour, campus, select, setPhone } = useStore()
+  const snapNow = useStore((s) => s.snap)
+  const nav = useNavigate()
+  const [step, setStep] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const [ready, setReady] = useState(false) // current step's action finished
+  const steps = useRef(null)
+  const token = useRef(0)
+
+  useEffect(() => {
+    if (!tourOn || !campus) return
+    steps.current = buildSteps(campus)
+    setStep(0); setPaused(false)
+  }, [tourOn, campus])
+
+  // run the current step's action, then dwell, then advance
+  useEffect(() => {
+    if (!tourOn || !steps.current) return
+    const my = ++token.current
+    const s = steps.current[step]
+    setReady(false)
+    ;(async () => {
+      try { await s.run({ nav, select, phone: setPhone }) } catch { /* keep the tour going */ }
+      if (token.current !== my) return
+      setReady(true)
+    })()
+  }, [tourOn, step]) // eslint-disable-line
+
+  useEffect(() => {
+    if (!tourOn || !ready || paused || !steps.current) return
+    const s = steps.current[step]
+    if (s.dwell == null) return
+    const t = setTimeout(() => setStep((n) => Math.min(n + 1, steps.current.length - 1)), s.dwell)
+    return () => clearTimeout(t)
+  }, [tourOn, ready, paused, step])
+
+  if (!tourOn || !steps.current) return null
+  const s = steps.current[step]
+  const last = step === steps.current.length - 1
+  const close = () => { token.current++; stopTour(); setPhone(false) }
+
+  return (
+    <div className="no-print fixed z-[60] left-1/2 -translate-x-1/2 bottom-[84px] md:bottom-6 w-[calc(100%-16px)] max-w-[620px] glass-strong p-4 pop">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="chip !text-[11px]">Guided demo · {step + 1}/{steps.current.length}</span>
+        {!ready && <span className="text-[11px] text-teal-200/80 animate-pulse">working on the live twin…</span>}
+        <button className="btn !p-1.5 ml-auto" onClick={close} title="Close the demo"><X size={15} /></button>
+      </div>
+      <div className="h-1 rounded-full bg-white/10 overflow-hidden mb-3">
+        <div className="h-full bg-gradient-to-r from-teal-300 to-emerald-300 transition-all duration-500" style={{ width: `${((step + 1) / steps.current.length) * 100}%` }} />
+      </div>
+      <div className="font-bold text-lg leading-snug">{s.title}</div>
+      <div className="text-sm text-slate-300 mt-1 leading-relaxed">{s.text(snapNow)}</div>
+      <div className="flex gap-2 mt-3">
+        {last ? (
+          <>
+            <button className="btn" onClick={() => setStep(0)}><RotateCcw size={14} /> Replay</button>
+            <button className="btn btn-primary ml-auto" onClick={close}>Explore on my own</button>
+          </>
+        ) : (
+          <>
+            <button className="btn" onClick={() => setPaused(!paused)}>{paused ? <><Play size={14} /> Resume</> : <><Pause size={14} /> Pause</>}</button>
+            <button className="btn btn-primary ml-auto" disabled={!ready} onClick={() => setStep(step + 1)}>Next <ChevronRight size={15} /></button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
