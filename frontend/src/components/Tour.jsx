@@ -2,11 +2,46 @@
 // with captions, so judges can see the full loop without a presenter.
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronRight, Pause, Play, RotateCcw, X } from 'lucide-react'
+import { ChevronRight, Pause, Play, RotateCcw, Volume2, VolumeX, X } from 'lucide-react'
 import { api, inr } from '../api'
 import { useStore } from '../store'
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
+// ---- voice-over: the browser's own text-to-speech reads each caption
+const synth = typeof window !== 'undefined' ? window.speechSynthesis : null
+const VOICE_KEY = 'cp_tour_voice'
+let voice = null
+function pickVoice() {
+  const all = synth?.getVoices() || []
+  const en = all.filter((v) => /^en/i.test(v.lang))
+  voice = en.find((v) => /en-IN/i.test(v.lang) && /natural|neural/i.test(v.name))
+    || en.find((v) => /natural|neural/i.test(v.name))
+    || en.find((v) => /en-IN/i.test(v.lang))
+    || en.find((v) => /Google (UK|US) English/i.test(v.name))
+    || en[0] || null
+}
+if (synth) { pickVoice(); synth.addEventListener?.('voiceschanged', pickVoice) }
+
+// captions are written for reading; smooth over symbols a voice would trip on
+function forSpeech(t) {
+  return t
+    .replace(/₹\s?([\d,]+(?:\.\d+)?)\/h/g, '$1 rupees an hour')
+    .replace(/₹\s?([\d,]+(?:\.\d+)?)/g, '$1 rupees')
+    .replace(/CO₂/g, 'C O 2')
+    .replace(/\bNAAC\b/g, 'nack')
+    .replace(/\b([A-Z]{1,2})-(\d)/g, '$1 $2')
+}
+
+function speak(text, onDone) {
+  synth.cancel()
+  const u = new SpeechSynthesisUtterance(forSpeech(text))
+  if (voice) { u.voice = voice; u.lang = voice.lang } else u.lang = 'en-IN'
+  u.rate = 1.08
+  u.onend = onDone
+  u.onerror = onDone
+  synth.speak(u)
+}
 const snap = () => useStore.getState().snap
 const OPEN = (i) => !['verified', 'auto_closed', 'closed'].includes(i.status)
 
@@ -146,6 +181,15 @@ export default function Tour() {
   const [ready, setReady] = useState(false) // current step's action finished
   const steps = useRef(null)
   const token = useRef(0)
+  const speechTok = useRef(0)
+  const [voiceOn, setVoiceOn] = useState(() => { try { return localStorage.getItem(VOICE_KEY) !== 'off' } catch { return true } })
+  const [spoken, setSpoken] = useState(true) // narration for this step has finished
+  const [dwelt, setDwelt] = useState(false) // minimum time on this step has passed
+  const toggleVoice = () => {
+    const on = !voiceOn
+    setVoiceOn(on)
+    try { localStorage.setItem(VOICE_KEY, on ? 'on' : 'off') } catch { /* private mode */ }
+  }
 
   useEffect(() => {
     if (!tourOn || !campus) return
@@ -166,25 +210,52 @@ export default function Tour() {
     })()
   }, [tourOn, step]) // eslint-disable-line
 
+  // read the caption aloud once the step's action is done (and again after Resume)
   useEffect(() => {
+    if (!tourOn || !ready || paused || !voiceOn || !synth || !steps.current) { setSpoken(true); return }
+    const s = steps.current[step]
+    const text = `${s.title}. ${s.text(useStore.getState().snap)}`
+    const my = ++speechTok.current
+    const done = () => { if (speechTok.current === my) setSpoken(true) }
+    setSpoken(false)
+    speak(text, done)
+    const failsafe = setTimeout(done, 4000 + text.split(' ').length * 450) // some browsers never fire 'end'
+    return () => { speechTok.current++; clearTimeout(failsafe); synth.cancel() }
+  }, [tourOn, ready, paused, voiceOn, step])
+
+  useEffect(() => {
+    setDwelt(false)
     if (!tourOn || !ready || paused || !steps.current) return
     const s = steps.current[step]
     if (s.dwell == null) return
-    const t = setTimeout(() => setStep((n) => Math.min(n + 1, steps.current.length - 1)), s.dwell)
+    const t = setTimeout(() => setDwelt(true), s.dwell)
     return () => clearTimeout(t)
   }, [tourOn, ready, paused, step])
+
+  // move on when both the minimum time and the narration are done
+  useEffect(() => {
+    if (!tourOn || !dwelt || !spoken || paused || !steps.current) return
+    const t = setTimeout(() => setStep((n) => Math.min(n + 1, steps.current.length - 1)), 600)
+    return () => clearTimeout(t)
+  }, [tourOn, dwelt, spoken, paused])
 
   if (!tourOn || !steps.current) return null
   const s = steps.current[step]
   const last = step === steps.current.length - 1
-  const close = () => { token.current++; stopTour(); setPhone(false) }
+  const close = () => { token.current++; synth?.cancel(); stopTour(); setPhone(false) }
 
   return (
     <div className="no-print fixed z-[60] left-1/2 -translate-x-1/2 bottom-[84px] md:bottom-6 w-[calc(100%-16px)] max-w-[620px] glass-strong p-4 pop">
       <div className="flex items-center gap-2 mb-2">
         <span className="chip !text-[11px]">Guided demo · {step + 1}/{steps.current.length}</span>
         {!ready && <span className="text-[11px] text-blue-200/80 animate-pulse">working on the live twin…</span>}
-        <button className="btn !p-1.5 ml-auto" onClick={close} title="Close the demo"><X size={15} /></button>
+        {synth && (
+          <button className="btn !p-1.5 ml-auto" onClick={toggleVoice} title={voiceOn ? 'Mute the voice-over' : 'Turn the voice-over on'}
+            aria-label={voiceOn ? 'Mute the voice-over' : 'Turn the voice-over on'}>
+            {voiceOn ? <Volume2 size={15} /> : <VolumeX size={15} />}
+          </button>
+        )}
+        <button className={`btn !p-1.5 ${synth ? '' : 'ml-auto'}`} onClick={close} title="Close the demo"><X size={15} /></button>
       </div>
       <div className="h-1 rounded-full bg-white/10 overflow-hidden mb-3">
         <div className="h-full bg-gradient-to-r from-blue-400 to-blue-300 transition-all duration-500" style={{ width: `${((step + 1) / steps.current.length) * 100}%` }} />
