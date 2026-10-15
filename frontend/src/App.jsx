@@ -1,7 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import { NavLink, Route, Routes } from 'react-router-dom'
-import { Box, Camera, ClipboardList, FileText, FlaskConical, Loader2, MessageCircle, PlayCircle, Sparkles, SlidersHorizontal } from 'lucide-react'
+import { Box, Camera, ClipboardList, FileText, FlaskConical, Loader2, PlayCircle, Sparkles, SlidersHorizontal } from 'lucide-react'
 import { useStore } from './store'
+import TelegramIcon from './components/TelegramIcon'
 import PhonePanel from './components/PhonePanel'
 import CopilotDrawer from './components/CopilotDrawer'
 import DemoPanel from './components/DemoPanel'
@@ -90,10 +91,6 @@ export default function App() {
             <PlayCircle size={16} /><span className="hidden lg:inline">Play demo</span>
           </button>
           <button className="btn !px-2.5" onClick={toggleDemo} title="Try a scenario (Ctrl+D)"><SlidersHorizontal size={16} /></button>
-          <button className={`btn !px-2.5 relative ${phoneOpen ? '!border-blue-300/50' : ''}`} onClick={togglePhone} title="Staff messages">
-            <MessageCircle size={16} />
-            {unread && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-blue-300 shadow-[0_0_8px_#93c5fd]" />}
-          </button>
           <button className="btn btn-primary !px-2.5 md:!px-3.5" onClick={() => openCopilot()}>
             <Sparkles size={16} /><span className="hidden sm:inline">Ask campus</span>
           </button>
@@ -124,6 +121,15 @@ export default function App() {
         ))}
       </nav>
 
+      {/* floating Telegram button: opens the staff messages drawer */}
+      {ready && (
+        <button onClick={togglePhone} title="Staff messages (Telegram)" aria-label="Staff messages"
+          className={`no-print fixed z-40 right-4 bottom-[84px] md:bottom-5 rounded-full shadow-[0_10px_30px_rgba(34,158,217,0.45)]
+            transition hover:scale-105 active:scale-95 ${phoneOpen ? 'ring-2 ring-white/70' : ''}`}>
+          <TelegramIcon size={54} />
+          {unread && <span className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full bg-rose-400 border-2 border-[#1d1d1d]" />}
+        </button>
+      )}
       {phoneOpen && ready && <PhonePanel />}
       <CopilotDrawer />
       <DemoPanel />

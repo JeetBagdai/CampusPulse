@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CheckCheck, MessageCircle, Send } from 'lucide-react'
 import { RoleIcon } from './Icons'
+import TelegramIcon from './TelegramIcon'
 import { api } from '../api'
 import { useStore } from '../store'
 
@@ -14,7 +15,7 @@ export default function PhonePanel() {
   const end = useRef(null)
   const feed = snap.feed.filter((m) => role === 'all' || m.role === role)
   const real = snap.channel !== 'console'
-  const app = snap.channel === 'telegram' ? 'Telegram' : 'WhatsApp'
+  const app = ['telegram', 'console'].includes(snap.channel) ? 'Telegram' : 'WhatsApp'
 
   useEffect(() => { end.current?.scrollIntoView({ behavior: 'smooth' }) }, [feed.length])
 
@@ -23,9 +24,10 @@ export default function PhonePanel() {
   }
 
   return (
-    <aside className="no-print glass-strong fixed inset-2 top-[64px] md:inset-auto md:right-4 md:top-[68px] md:bottom-4 md:w-[360px] z-40 flex flex-col p-3 pop">
+    <aside className="no-print glass-strong fixed inset-x-2 top-[64px] bottom-[148px] md:inset-auto md:right-4 md:top-[68px] md:bottom-[88px] md:w-[360px] z-40 flex flex-col p-3 pop">
       <div className="flex items-center gap-2 mb-2">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${snap.channel === 'telegram' ? 'bg-[#229ED9]' : 'bg-blue-500'}`}><MessageCircle size={16} className="text-white" /></div>
+        {app === 'Telegram' ? <TelegramIcon size={32} />
+          : <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500"><MessageCircle size={16} className="text-white" /></div>}
         <div className="flex-1 min-w-0">
           <div className="font-semibold text-sm leading-tight truncate">Staff {app}{snap.bot?.username ? ` · @${snap.bot.username}` : ''}</div>
           <div className="text-[11px] text-slate-400 leading-tight">

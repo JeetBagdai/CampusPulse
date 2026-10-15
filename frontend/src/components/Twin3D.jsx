@@ -1,6 +1,6 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useMemo, useRef, useState } from 'react'
 import { Shape, Vector3 } from 'three'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { Edges, Line, OrbitControls } from '@react-three/drei'
 import { Camera, LocateFixed } from 'lucide-react'
 import { STATUS_COLOR, TYPE_META, useStore } from '../store'
@@ -113,19 +113,6 @@ const Bin = memo(function Bin({ bin, fill, selected, onSelect }) {
   )
 })
 
-// Shift the rendered image so the campus is centred in the area not covered by the panel/sheet,
-// regardless of how the user orbits: left on desktop (side panel), up on phones (bottom sheet).
-function ViewOffset() {
-  const { camera, size } = useThree()
-  useEffect(() => {
-    const desktop = size.width >= 768
-    camera.setViewOffset(size.width, size.height, desktop ? 120 : 0, desktop ? 0 : size.height * 0.2, size.width, size.height)
-    camera.updateProjectionMatrix()
-    return () => { camera.clearViewOffset(); camera.updateProjectionMatrix() }
-  }, [camera, size.width, size.height])
-  return null
-}
-
 // One loop moves every DOM overlay (building labels + issue pins) to its 3D anchor each frame.
 const _v = new Vector3()
 function Projector({ points, els }) {
@@ -178,7 +165,6 @@ export default function Twin3D() {
         <color attach="background" args={[VP.bg]} />
         <hemisphereLight args={['#ffffff', '#3a3a3a', 1.1]} />
         <directionalLight position={[300, 500, 200]} intensity={1.4} />
-        <ViewOffset />
         <OrbitControls ref={controls} target={target} maxPolarAngle={Math.PI / 2.15} minDistance={40} maxDistance={1600} makeDefault />
         <mesh rotation={FLAT} position={[0, -0.05, 0]}>
           <planeGeometry args={[8000, 8000]} />

@@ -9,6 +9,8 @@ import { STATUS_COLOR, useStore } from '../store'
 
 const LEGEND = [['active', 'occupied'], ['idle', 'empty / off'], ['energy', 'energy waste'], ['water', 'water leak'],
   ['waste', 'bin / litter'], ['underused', 'underused booking'], ['fixed', 'fixed']]
+// issues / trends / activity side panel on the twin (hidden for now)
+const SHOW_OVERVIEW = false
 const FIX_LABEL = { tube_light: 'Tube lights', led_light: 'LED lights', fan: 'Fans', ac: 'AC', projector: 'Projector', pc: 'PCs', exhaust: 'Exhaust' }
 
 function ReportQR({ id }) {
@@ -219,13 +221,14 @@ export default function TwinPage() {
       <Twin3D />
       <KpiCard />
       <Legend />
-      {/* desktop: floating side panel; phone: bottom sheet over the lower part of the map */}
-      <aside className="glass-panel absolute z-10 p-3 overflow-auto
+      {/* details panel for the selected room/bin; the issues overview is hidden while SHOW_OVERVIEW is false.
+          desktop: floating side panel; phone: bottom sheet over the lower part of the map */}
+      {(selected || SHOW_OVERVIEW) && <aside className="glass-panel absolute z-10 p-3 overflow-auto
         md:right-3 md:top-3 md:bottom-3 md:w-[380px]
         max-md:inset-x-2 max-md:bottom-2 max-md:h-[44%] max-md:!rounded-b-2xl max-md:!rounded-t-3xl">
         <div className="md:hidden mx-auto mb-2 h-1 w-10 rounded-full bg-white/25" />
         {selected ? <Drawer id={selected} /> : <Overview />}
-      </aside>
+      </aside>}
     </div>
   )
 }
