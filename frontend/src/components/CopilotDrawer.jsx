@@ -44,7 +44,7 @@ export default function CopilotDrawer() {
 
   if (!copilotOpen) return null
   return (
-    <div className="no-print fixed inset-2 top-16 md:inset-auto md:right-4 md:top-16 md:bottom-4 md:w-[440px] glass-strong flex flex-col shadow-2xl z-50 pop">
+    <div className="no-print fixed inset-2 top-[76px] md:inset-auto md:right-4 md:top-[96px] md:bottom-4 md:w-[440px] glass-strong flex flex-col shadow-2xl z-50 pop">
       <div className="flex items-center gap-2 p-3 border-b border-line">
         <Sparkles size={18} className="text-blue-300" />
         <div className="font-semibold">Ask your campus</div>

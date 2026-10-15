@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
-import { NavLink, Route, Routes } from 'react-router-dom'
-import { Box, Camera, ClipboardList, FileText, FlaskConical, Loader2, PlayCircle } from 'lucide-react'
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import { ArrowRight, Box, Camera, ClipboardList, FileText, FlaskConical, Loader2 } from 'lucide-react'
 import { useStore } from './store'
 import TelegramIcon from './components/TelegramIcon'
 import PhonePanel from './components/PhonePanel'
@@ -16,12 +16,12 @@ const IssuesPage = lazy(() => import('./pages/IssuesPage'))
 const WhatIfPage = lazy(() => import('./pages/WhatIfPage'))
 const ReportsPage = lazy(() => import('./pages/ReportsPage'))
 
+// Cameras is not in the nav: it has its own floating button next to the Telegram one
 const NAV = [
-  { to: '/', label: 'Twin', icon: Box },
-  { to: '/issues', label: 'Work orders', short: 'Orders', icon: ClipboardList },
-  { to: '/cameras', label: 'Cameras', icon: Camera },
-  { to: '/whatif', label: 'What-if', icon: FlaskConical },
-  { to: '/reports', label: 'Reports', icon: FileText },
+  { to: '/', label: 'Home', icon: Box },
+  { to: '/issues', label: 'Work', icon: ClipboardList },
+  { to: '/whatif', label: 'Projection', icon: FlaskConical },
+  { to: '/reports', label: 'Report', icon: FileText },
 ]
 
 function Clock() {
@@ -32,8 +32,8 @@ function Clock() {
   const d = new Date(clock)
   return (
     <div className="text-right leading-tight hidden md:block">
-      <div className="font-mono text-sm font-semibold">{d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
-      <div className="text-[10px] text-slate-400">
+      <div className="font-mono text-sm font-semibold text-neutral-900">{d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+      <div className="text-[10px] text-neutral-500">
         {d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
         {paused ? ' · paused' : speed > 1 ? ` · ${speed}×` : ''}
       </div>
@@ -52,6 +52,7 @@ export default function App() {
   const connected = useStore((s) => s.connected)
   const lastId = useStore((s) => s.snap?.feed?.at(-1)?.id ?? 0)
   const { toggleDemo, togglePhone, phoneOpen, startTour } = useStore()
+  const onTwin = useLocation().pathname === '/'
   const seen = useRef(0)
   const [unread, setUnread] = useState(false)
 
@@ -68,32 +69,35 @@ export default function App() {
 
   return (
     <div className="h-full flex flex-col">
-      <header className="no-print glass-bar flex items-center gap-3 md:gap-6 px-3 md:px-5 h-14 border-b border-line relative z-20 shrink-0">
-        <div className="flex items-center gap-2 shrink-0">
-          <img src="/favicon.svg" className="w-7 h-7" alt="" />
-          <span className="font-extrabold tracking-tight">CampusPulse</span>
-          {campus && <span className="hidden lg:inline-flex"><span className="chip !text-[11px]">{campus.short_name}</span></span>}
-        </div>
-        <nav className="hidden md:flex items-center gap-1">
+      {/* floating pill nav: links left, logo centred, demo button right */}
+      <header className="no-print navpill fixed z-30 top-3 inset-x-3 md:top-4 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-[min(1120px,calc(100%-32px))]
+        h-14 md:h-16 flex items-center gap-3 px-3 md:px-4">
+        <nav className="hidden md:flex items-center gap-0.5">
           {NAV.map(({ to, label }) => (
             <NavLink key={to} to={to} end
-              className={({ isActive }) => `px-3 py-1.5 rounded-full text-sm font-semibold transition
-                ${isActive ? 'bg-blue-400/15 text-blue-100 ring-1 ring-blue-300/30' : 'text-slate-400 hover:text-slate-100 hover:bg-white/5'}`}>
+              className={({ isActive }) => `px-3.5 py-2 rounded-full text-[15px] transition
+                ${isActive ? 'bg-neutral-900/[0.07] text-neutral-950 font-semibold' : 'text-neutral-700 hover:text-neutral-950 hover:bg-neutral-900/[0.04]'}`}>
               {label}
             </NavLink>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-1.5 md:gap-2 shrink-0">
+        <NavLink to="/" className="flex items-center gap-2 shrink-0 md:absolute md:left-1/2 md:-translate-x-1/2">
+          <img src="/favicon.svg" className="w-7 h-7" alt="" />
+          <span className="font-extrabold tracking-tight text-[17px] text-neutral-950">CampusPulse</span>
+          {campus && <span className="hidden xl:inline text-[11px] font-semibold text-neutral-500 bg-neutral-900/[0.06] rounded-full px-2 py-0.5">{campus.short_name}</span>}
+        </NavLink>
+        <div className="ml-auto flex items-center gap-3 shrink-0">
           <Clock />
-          <span className={`w-2 h-2 rounded-full mx-1 ${connected ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-rose-400'}`}
-            title={connected ? 'live' : 'offline'} />
-          <button className="btn !px-2.5 md:!px-3" onClick={startTour} title="Play the 2-minute guided demo">
-            <PlayCircle size={16} /><span className="hidden lg:inline">Play demo</span>
+          <span className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-500' : 'bg-rose-500'}`} title={connected ? 'live' : 'offline'} />
+          <button onClick={startTour} title="Play the 2-minute guided demo"
+            className="flex items-center gap-2.5 rounded-[14px] bg-[#4772b3] hover:bg-[#3f67a3] text-white font-semibold text-sm pl-4 pr-1.5 py-1.5 md:py-2 transition shadow-[0_6px_18px_rgba(71,114,179,0.35)]">
+            <span>Play demo</span>
+            <span className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><ArrowRight size={15} /></span>
           </button>
         </div>
       </header>
 
-      <main className="flex-1 min-w-0 min-h-0 overflow-auto pb-[68px] md:pb-0">
+      <main className={`flex-1 min-w-0 min-h-0 overflow-auto pb-[68px] md:pb-0 ${onTwin ? '' : 'pt-[72px] md:pt-[88px]'}`}>
         {!ready ? <div className="p-10 text-slate-400">Connecting to the campus twin…</div> : (
           <Suspense fallback={<Loading />}>
             <Routes>
@@ -108,15 +112,23 @@ export default function App() {
       </main>
 
       {/* phone: bottom tab bar */}
-      <nav className="no-print md:hidden fixed bottom-0 inset-x-0 z-30 glass-bar border-t border-line grid grid-cols-5 pb-[env(safe-area-inset-bottom)]">
-        {NAV.map(({ to, label, short, icon: Icon }) => (
+      <nav className="no-print md:hidden fixed bottom-0 inset-x-0 z-30 glass-bar border-t border-line grid grid-cols-4 pb-[env(safe-area-inset-bottom)]">
+        {NAV.map(({ to, label, icon: Icon }) => (
           <NavLink key={to} to={to} end
             className={({ isActive }) => `flex flex-col items-center gap-0.5 py-2 text-[10px] font-semibold ${isActive ? 'text-blue-200' : 'text-slate-400'}`}>
-            <Icon size={19} />{short || label}
+            <Icon size={19} />{label}
           </NavLink>
         ))}
       </nav>
 
+      {/* floating camera button (next to Telegram): opens the computer-vision page */}
+      {ready && (
+        <NavLink to="/cameras" title="Cameras" aria-label="Cameras"
+          className={({ isActive }) => `no-print fixed z-40 right-[82px] bottom-[84px] md:bottom-5 w-[54px] h-[54px] rounded-full flex items-center justify-center
+            bg-neutral-50 text-neutral-900 shadow-[0_10px_30px_rgba(0,0,0,0.45)] transition hover:scale-105 active:scale-95 ${isActive ? 'ring-2 ring-[#6ea0f5]' : ''}`}>
+          <Camera size={22} />
+        </NavLink>
+      )}
       {/* floating Telegram button: opens the staff messages drawer */}
       {ready && (
         <button onClick={togglePhone} title="Staff messages (Telegram)" aria-label="Staff messages"

@@ -187,7 +187,7 @@ function KpiCard() {
     ['Score', `${k.score}`, scoreTone(k.score)],
   ]
   return (
-    <div className="absolute left-3 top-3 md:left-4 md:top-4 glass grid grid-cols-4 divide-x divide-white/10 pointer-events-none max-md:right-3">
+    <div className="absolute left-3 top-[76px] md:left-4 md:top-[96px] glass grid grid-cols-4 divide-x divide-white/10 pointer-events-none max-md:right-3">
       {items.map(([l, v, tone]) => (
         <div key={l} className="px-2.5 py-2 md:px-4 md:py-2.5 min-w-0">
           <div className="text-[9px] md:text-[10px] uppercase tracking-wider text-slate-400 truncate">{l}</div>
@@ -224,7 +224,7 @@ export default function TwinPage() {
       {/* details panel for the selected room/bin; the issues overview is hidden while SHOW_OVERVIEW is false.
           desktop: floating side panel; phone: bottom sheet over the lower part of the map */}
       {(selected || SHOW_OVERVIEW) && <aside className="glass-panel absolute z-10 p-3 overflow-auto
-        md:right-3 md:top-3 md:bottom-3 md:w-[380px]
+        md:right-3 md:top-[96px] md:bottom-3 md:w-[380px]
         max-md:inset-x-2 max-md:bottom-2 max-md:h-[44%] max-md:!rounded-b-2xl max-md:!rounded-t-3xl">
         <div className="md:hidden mx-auto mb-2 h-1 w-10 rounded-full bg-white/25" />
         {selected ? <Drawer id={selected} /> : <Overview />}

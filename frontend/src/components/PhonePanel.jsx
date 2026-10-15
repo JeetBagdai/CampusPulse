@@ -24,7 +24,7 @@ export default function PhonePanel() {
   }
 
   return (
-    <aside className="no-print glass-strong fixed inset-x-2 top-[64px] bottom-[148px] md:inset-auto md:right-4 md:top-[68px] md:bottom-[88px] md:w-[360px] z-40 flex flex-col p-3 pop">
+    <aside className="no-print glass-strong fixed inset-x-2 top-[76px] bottom-[148px] md:inset-auto md:right-4 md:top-[96px] md:bottom-[88px] md:w-[360px] z-40 flex flex-col p-3 pop">
       <div className="flex items-center gap-2 mb-2">
         {app === 'Telegram' ? <TelegramIcon size={32} />
           : <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500"><MessageCircle size={16} className="text-white" /></div>}

@@ -10,9 +10,9 @@ Every Indian college does its green audit (NAAC Criterion 7) once a year, by han
 
 1. **Open the live app:** https://campuspulse-jb26.onrender.com
    (free hosting: the first load after a quiet spell can take ~30 s while the server wakes up)
-2. Click **Play the 2-minute demo**. It runs by itself: lights are left on in a classroom, CampusPulse detects and prices the waste, writes a work order, the staff member taps Done, the twin verifies the fix, then it tours a leak, work orders, cameras, the what-if simulator and the NAAC report.
+2. Click **Play the 2-minute demo**. It runs by itself: lights are left on in a classroom, CampusPulse detects and prices the waste, writes a work order, the staff member taps Done, the twin verifies the fix, then it tours a leak, work orders, cameras, the projection (what-if) simulator and the NAAC report.
 3. **Optional, to see the staff side on your own phone:** open [t.me/campuspulse_bot?start=judge](https://t.me/campuspulse_bot?start=judge) in Telegram and tap Start before playing the demo. You will receive a copy of each work order and can tap **Done** yourself.
-4. **Try the computer vision:** open **Cameras** and click a sample bin photo (or upload your own). An overflowing bin raises a real issue on the twin. With a webcam, start the live camera: it counts people and checks whether lights are on.
+4. **Try the computer vision:** tap the round camera button (bottom right) and click a sample bin photo (or upload your own). An overflowing bin raises a real issue on the twin. With a webcam, start the live camera: it counts people and checks whether lights are on.
 5. **Explore:** click any room or bin for its live readings and QR code, open the staff messages with the Telegram button, or press **Ctrl+D** to trigger a scenario.
 
 Everyone viewing the demo shares one simulated campus, so you may see issues others triggered.
