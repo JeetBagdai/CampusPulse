@@ -3,24 +3,12 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CheckCircle2, MapPin, Sparkles } from 'lucide-react'
 import { api, hhmm, inr } from '../api'
-import { TYPE_META, useStore } from '../store'
+import { TYPE_META, issueTitle as title, useStore } from '../store'
 import TelegramIcon from '../components/TelegramIcon'
 
 const DONE = ['verified', 'auto_closed', 'closed']
 const LANGS = [['en', 'English'], ['hi', 'हिन्दी'], ['kn', 'ಕನ್ನಡ']]
 const KIND = { ENERGY_WASTE: 'Energy waste', WATER_LEAK: 'Water leak', BIN_OVERFLOW: 'Waste', LITTER: 'Litter', UNDERUSED_BOOKING: 'Underused booking' }
-
-function title(i) {
-  const n = i.target_name || i.target
-  switch (i.type) {
-    case 'ENERGY_WASTE': return `Lights on in empty ${n}`
-    case 'WATER_LEAK': return `Water leak in ${n}`
-    case 'BIN_OVERFLOW': return `Bin overflowing at ${n}`
-    case 'LITTER': return `Litter reported at ${n}`
-    case 'UNDERUSED_BOOKING': return `${n} booked but empty`
-    default: return n
-  }
-}
 
 function subline(i, wo) {
   if (i.status === 'resolved') return 'checking the fix'

@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Video, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { CheckCircle2, Video, X } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import Twin3D from '../components/Twin3D'
 import IssueCard from '../components/IssueCard'
 import { api, hhmm, inr, num } from '../api'
-import { STATUS_COLOR, useStore } from '../store'
+import { OPEN_ISSUE, STATUS_COLOR, TYPE_META, issueTitle, useStore } from '../store'
+import { TypeIcon } from '../components/Icons'
 
 const LEGEND = [['active', 'occupied'], ['idle', 'empty / off'], ['energy', 'energy waste'], ['water', 'water leak'],
   ['waste', 'bin / litter'], ['underused', 'underused booking'], ['fixed', 'fixed']]
@@ -198,6 +199,74 @@ function KpiCard() {
   )
 }
 
+// A card slides in for each newly detected issue; clicking it flies the camera there.
+const TOAST_MS = 7000
+function AlertToasts() {
+  const issues = useStore((s) => s.snap.issues)
+  const wos = useStore((s) => s.snap.workorders)
+  const tourOn = useStore((s) => s.tourOn)
+  const select = useStore((s) => s.select)
+  const seen = useRef(null)
+  const [toasts, setToasts] = useState([])
+
+  useEffect(() => {
+    // issues already open when the page loads don't pop up
+    if (seen.current === null) { seen.current = new Set(issues.map((i) => i.id)); return }
+    const fresh = issues.filter((i) => OPEN_ISSUE(i) && !seen.current.has(i.id))
+    if (!fresh.length) return
+    fresh.forEach((i) => seen.current.add(i.id))
+    setToasts((t) => [...fresh.map((i) => ({ id: i.id, at: Date.now() })), ...t].slice(0, 3))
+  }, [issues])
+
+  useEffect(() => {
+    if (!toasts.length) return
+    const t = setInterval(() => setToasts((ts) => ts.filter((x) => Date.now() - x.at < TOAST_MS)), 1000)
+    return () => clearInterval(t)
+  }, [toasts.length])
+
+  if (tourOn || !toasts.length) return null
+  const dismiss = (id) => setToasts((ts) => ts.filter((x) => x.id !== id))
+  return (
+    <div className="absolute z-20 flex flex-col gap-2 left-3 right-3 top-[140px] md:top-auto md:left-1/2 md:right-auto md:-translate-x-1/2 md:bottom-6 md:w-[420px]">
+      {toasts.map(({ id }) => {
+        const i = issues.find((x) => x.id === id)
+        if (!i) return null
+        const meta = TYPE_META[i.type] || {}
+        const wo = wos?.[i.wo]
+        return (
+          <div key={id} className="glass-strong !rounded-2xl flex items-center gap-3 p-3 pop">
+            <button onClick={() => { select(i.target); dismiss(id) }} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+              <span className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${meta.color}26`, color: meta.color }}>
+                <TypeIcon type={i.type} size={17} />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-semibold text-sm truncate">{issueTitle(i)}</span>
+                <span className="block text-xs text-slate-400 truncate">
+                  {i.rate_inr_hr > 0 && <span className="text-rose-300">{inr(i.rate_inr_hr)}/h · </span>}
+                  {wo ? `sent to ${wo.assignee}` : i.location}
+                </span>
+              </span>
+            </button>
+            <button className="btn !p-1.5 shrink-0" onClick={() => dismiss(id)} aria-label="Dismiss"><X size={14} /></button>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function AllClear() {
+  const open = useStore((s) => s.snap.kpis.open_issues)
+  if (open) return null
+  return (
+    <div className="absolute z-10 left-1/2 -translate-x-1/2 top-[140px] md:top-[96px] glass-strong !rounded-full px-4 py-2 flex items-center gap-2 text-sm whitespace-nowrap pointer-events-none pop">
+      <CheckCircle2 size={16} className="text-emerald-300" />
+      <span className="font-semibold">All clear</span>
+      <span className="text-slate-400 max-sm:hidden">· the campus is running clean</span>
+    </div>
+  )
+}
+
 function Legend() {
   const [open, setOpen] = useState(false)
   return (
@@ -220,12 +289,14 @@ export default function TwinPage() {
     <div className="h-full relative min-h-[520px]">
       <Twin3D />
       <KpiCard />
+      <AllClear />
+      <AlertToasts />
       <Legend />
       {/* details panel for the selected room/bin; the issues overview is hidden while SHOW_OVERVIEW is false.
           desktop: floating side panel; phone: bottom sheet over the lower part of the map */}
       {(selected || SHOW_OVERVIEW) && <aside className="glass-panel absolute z-10 p-3 overflow-auto
-        md:right-3 md:top-[96px] md:bottom-3 md:w-[380px]
-        max-md:inset-x-2 max-md:bottom-2 max-md:h-[44%] max-md:!rounded-b-2xl max-md:!rounded-t-3xl">
+        md:right-3 md:top-[96px] md:bottom-[88px] md:w-[380px]
+        max-md:inset-x-2 max-md:bottom-[150px] max-md:h-[40%] max-md:!rounded-b-2xl max-md:!rounded-t-3xl">
         <div className="md:hidden mx-auto mb-2 h-1 w-10 rounded-full bg-white/25" />
         {selected ? <Drawer id={selected} /> : <Overview />}
       </aside>}

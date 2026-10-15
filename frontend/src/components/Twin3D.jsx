@@ -1,6 +1,6 @@
-import { memo, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Shape, Vector3 } from 'three'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Edges, Line, OrbitControls } from '@react-three/drei'
 import { Camera, LocateFixed } from 'lucide-react'
 import { STATUS_COLOR, TYPE_META, useStore } from '../store'
@@ -113,6 +113,56 @@ const Bin = memo(function Bin({ bin, fill, selected, onSelect }) {
   )
 })
 
+// Glides the camera to the selected room/bin, and slowly orbits the campus after 20 s without input.
+const IDLE_MS = 20000
+function CameraDirector({ controls, focus, orbit }) {
+  const { camera, gl } = useThree()
+  const fly = useRef(null)
+  const lastInput = useRef(performance.now())
+
+  useEffect(() => {
+    const touched = () => { lastInput.current = performance.now() }
+    const grab = () => { touched(); fly.current = null } // dragging the map takes over from a glide
+    const el = gl.domElement
+    window.addEventListener('pointerdown', touched)
+    window.addEventListener('keydown', touched)
+    el.addEventListener('pointerdown', grab)
+    el.addEventListener('wheel', grab, { passive: true })
+    return () => {
+      window.removeEventListener('pointerdown', touched)
+      window.removeEventListener('keydown', touched)
+      el.removeEventListener('pointerdown', grab)
+      el.removeEventListener('wheel', grab)
+    }
+  }, [gl])
+
+  const key = focus ? focus.join(',') : ''
+  useEffect(() => {
+    const c = controls.current
+    if (!focus || !c) return
+    const to = new Vector3(...focus)
+    const dir = camera.position.clone().sub(c.target)
+    const dist = Math.min(dir.length(), 340)
+    fly.current = { t: 0, fromT: c.target.clone(), toT: to, fromC: camera.position.clone(),
+      toC: to.clone().add(dir.normalize().multiplyScalar(dist)) }
+  }, [key]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useFrame((_, dt) => {
+    const c = controls.current
+    if (!c) return
+    const f = fly.current
+    if (f) {
+      f.t = Math.min(1, f.t + dt / 1.2)
+      const e = 1 - Math.pow(1 - f.t, 3)
+      c.target.lerpVectors(f.fromT, f.toT, e)
+      camera.position.lerpVectors(f.fromC, f.toC, e)
+      if (f.t >= 1) fly.current = null
+    }
+    c.autoRotate = orbit && !f && performance.now() - lastInput.current > IDLE_MS
+  })
+  return null
+}
+
 // One loop moves every DOM overlay (building labels + issue pins) to its 3D anchor each frame.
 const _v = new Vector3()
 function Projector({ points, els }) {
@@ -139,6 +189,14 @@ export default function Twin3D() {
   const els = useRef({})
   const points = useRef([])
   const controls = useRef()
+  const tourOn = useStore((s) => s.tourOn)
+  // centre of each room / bin, for the camera glide
+  const centers = useMemo(() => {
+    const m = {}
+    campus.rooms.forEach((r) => { m[r.id] = [r.pos[0], r.pos[1] + r.size[1] / 2, r.pos[2]] })
+    campus.bins.forEach((b) => { m[b.id] = [b.pos[0], 2, b.pos[2]] })
+    return m
+  }, [campus])
 
   const anchors = useMemo(() => {
     const m = {}
@@ -165,7 +223,9 @@ export default function Twin3D() {
         <color attach="background" args={[VP.bg]} />
         <hemisphereLight args={['#ffffff', '#3a3a3a', 1.1]} />
         <directionalLight position={[300, 500, 200]} intensity={1.4} />
-        <OrbitControls ref={controls} target={target} maxPolarAngle={Math.PI / 2.15} minDistance={40} maxDistance={2600} makeDefault />
+        <OrbitControls ref={controls} target={target} maxPolarAngle={Math.PI / 2.15} minDistance={40} maxDistance={2600}
+          autoRotateSpeed={0.35} makeDefault />
+        <CameraDirector controls={controls} focus={centers[selected]} orbit={!selected && !tourOn} />
         <mesh rotation={FLAT} position={[0, -0.05, 0]}>
           <planeGeometry args={[8000, 8000]} />
           <meshBasicMaterial color={VP.floor} />

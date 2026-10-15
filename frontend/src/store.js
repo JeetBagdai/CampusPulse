@@ -54,6 +54,21 @@ export const STATUS_COLOR = {
   litter: '#fbbf24', waste: '#fbbf24', fixed: '#34d399', ok: '#34d399',
 }
 
+// plain-English title for an issue, e.g. "Lights on in empty Lab 402"
+export function issueTitle(i) {
+  const n = i.target_name || i.target
+  switch (i.type) {
+    case 'ENERGY_WASTE': return `Lights on in empty ${n}`
+    case 'WATER_LEAK': return `Water leak in ${n}`
+    case 'BIN_OVERFLOW': return `Bin overflowing at ${n}`
+    case 'LITTER': return `Litter reported at ${n}`
+    case 'UNDERUSED_BOOKING': return `${n} booked but empty`
+    default: return n
+  }
+}
+
+export const OPEN_ISSUE = (i) => !['verified', 'auto_closed', 'closed'].includes(i.status)
+
 export const TYPE_META = {
   ENERGY_WASTE: { label: 'Energy waste', color: '#fb7185' },
   WATER_LEAK: { label: 'Water leak', color: '#3b82f6' },
